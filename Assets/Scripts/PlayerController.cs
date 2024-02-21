@@ -51,9 +51,9 @@ public class PlayerController : MonoBehaviour
 
     private void LateUpdate()
     {
-        _isGrounded = Physics2D.Raycast(transform.position, -Vector2.up, _collider.size.y + _offset, _layerObstacle);
-        Debug.DrawRay(transform.position, -Vector2.up, Color.green, _collider.size.y + _offset);
-        Debug.Log(_isGrounded);
+        _isGrounded = Physics2D.Raycast(transform.position, -Vector2.up, _collider.size.y + _offset, _layerObstacle);   ////
+        Debug.DrawRay(transform.position, -Vector2.up, Color.green, _collider.size.y + _offset);                        ////
+        Debug.Log(_isGrounded);                                                                                         ////
     }
 
     private void Update()
