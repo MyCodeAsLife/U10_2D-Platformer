@@ -4,17 +4,19 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(Rigidbody2D))]
-[RequireComponent(typeof(Collider2D))]
+//[RequireComponent(typeof(Collider2D))]
 public class PlayerController : MonoBehaviour
 {
+    [SerializeField] private LayerMask _layerObstacle;
+    [SerializeField] private Transform _groundChecker;
+
     private PlayerInputActions _playerInputActions;
-    private CapsuleCollider2D _collider;
     private Rigidbody2D _rigidbody;
 
-    private Vector2 _inputVector;
-    private int _layerObstacle;
+    private CapsuleCollider2D _groundCheckCollider;
+    //private CapsuleCollider2D _collider;
 
-    private float _rayCastDistance;
+    private Vector2 _inputVector;
     private float _moveSpeed;
     private float _jumpPower;
 
@@ -36,12 +38,9 @@ public class PlayerController : MonoBehaviour
         _layerObstacle = 64;                                // Слой номер 6
 
         _rigidbody = GetComponent<Rigidbody2D>();
-        _collider = GetComponent<CapsuleCollider2D>();
+        //_collider = GetComponent<CapsuleCollider2D>();
         _playerInputActions = new PlayerInputActions();
-
-        float _offset = 0.01f;
-        float _half = 0.5f;
-        _rayCastDistance = transform.localScale.y * _collider.size.y * _half + _offset;
+        _groundChecker.TryGetComponent<CapsuleCollider2D>(out _groundCheckCollider);
     }
 
     private void OnEnable()
@@ -66,8 +65,7 @@ public class PlayerController : MonoBehaviour
 
     private void LateUpdate()
     {
-        _isGrounded = Physics2D.Raycast(transform.position, -Vector2.up, _rayCastDistance, _layerObstacle);
-        Debug.DrawRay(transform.position, -Vector2.up * _rayCastDistance, Color.green);
+        GroundCheck();
     }
 
     private void Update()
@@ -90,9 +88,13 @@ public class PlayerController : MonoBehaviour
 
     private void MoveDisable(InputAction.CallbackContext obj)
     {
-        //_rigidbody.velocity = new Vector2(0f, _rigidbody.velocity.y);     // Для отключение инерции
         MoveUpdate -= Move;
         _onMove = false;
+    }
+
+    private void GroundCheck()
+    {
+        _isGrounded = Physics2D.OverlapCapsule(_groundChecker.position, _groundCheckCollider.size, CapsuleDirection2D.Horizontal, 0, _layerObstacle);
     }
 
     private void MoveCalculate()
@@ -102,7 +104,6 @@ public class PlayerController : MonoBehaviour
 
     private void Move()
     {
-        _rigidbody.velocity = new Vector2(_inputVector.x * _moveSpeed * Time.deltaTime, _rigidbody.velocity.y);
         _rigidbody.velocity = new Vector2(_inputVector.x * _moveSpeed * Time.deltaTime, _rigidbody.velocity.y);
     }
 
@@ -125,15 +126,17 @@ public class PlayerController : MonoBehaviour
     {
         if (_isGrounded && _isBlocksJump == false)
         {
+            _rigidbody.velocity = new Vector2(_rigidbody.velocity.x, 0);
             _rigidbody.AddForce(Vector2.up * _jumpPower);
             _isBlocksJump = true;
+
             StartCoroutine(UnlockJump());
         }
     }
 
     private IEnumerator UnlockJump()
     {
-        float delay = 0.06f;
+        float delay = 0.1f;
         yield return new WaitForSeconds(delay);
         _isBlocksJump = false;
     }

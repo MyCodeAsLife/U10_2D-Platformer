@@ -2,12 +2,14 @@ using System.Collections;
 using UnityEngine;
 
 //[RequireComponent(typeof(Animator))]
+[RequireComponent(typeof(SpriteRenderer))]
 public class EnemyController : MonoBehaviour
 {
     //private const string Speed = "Speed";
 
     [SerializeField] private Transform _route;
 
+    private SpriteRenderer _spriteRenderer;
     private Transform[] _waypoints;
     private Transform _targetPoint;
     //private Animator _animator;
@@ -16,9 +18,14 @@ public class EnemyController : MonoBehaviour
     private float _moveSpeed;
     private float _minDistance;
 
+    private void Awake()
+    {
+        _spriteRenderer = GetComponent<SpriteRenderer>();
+    }
+
     private void Start()
     {
-        _minDistance = 1.9f;
+        _minDistance = 1.3f;
         _moveSpeed = 3;
         _waypoints = new Transform[_route.childCount];
 
@@ -33,40 +40,38 @@ public class EnemyController : MonoBehaviour
 
     private void Rotate()
     {
-        Vector3 direction = (_targetPoint.position - transform.position).normalized;
-        direction.y = 0;
-        transform.forward = direction;
+        _spriteRenderer.flipX = !_spriteRenderer.flipX;
     }
 
     private void Move()
     {
-        //_animator.SetFloat(Speed, _moveSpeed);
-
-        transform.Translate(Vector3.forward * _moveSpeed * Time.deltaTime);
+        transform.position = new Vector2(Mathf.MoveTowards(transform.position.x, _targetPoint.position.x, _moveSpeed * Time.deltaTime), transform.position.y);
     }
 
     private IEnumerator Movement()
     {
-        const float Second = 5f;
+        const float Second = 3.5f;
+        bool isMove = true;
 
         var wait = new WaitForSeconds(Second);
 
-        while (true)
+        while (isMove)
         {
             Move();
-            //Rotate();
+            Rotate();       // ƒобавить условие дл€ поворота(доп тригер?). ≈сли скорость > 0 то идем в право, иначе в лево.
 
-            float distance = Vector3.Distance(transform.position, _targetPoint.position);
+            float distance = Vector2.Distance(transform.position, _targetPoint.position);
 
             if (distance <= _minDistance)
             {
                 //_animator.SetFloat(Speed, 0);
 
+                _nextPointIndex = (_nextPointIndex + 1) % _waypoints.Length;
+                _targetPoint = _waypoints[_nextPointIndex];
                 yield return wait;
 
                 //_animator.SetFloat(Speed, _moveSpeed);
             }
-
             yield return null;
         }
     }
