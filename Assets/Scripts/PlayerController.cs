@@ -4,7 +4,6 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(Rigidbody2D))]
-//[RequireComponent(typeof(Collider2D))]
 public class PlayerController : MonoBehaviour
 {
     [SerializeField] private LayerMask _layerObstacle;
@@ -12,9 +11,7 @@ public class PlayerController : MonoBehaviour
 
     private PlayerInputActions _playerInputActions;
     private Rigidbody2D _rigidbody;
-
     private CapsuleCollider2D _groundCheckCollider;
-    //private CapsuleCollider2D _collider;
 
     private Vector2 _inputVector;
     private float _moveSpeed;
@@ -25,6 +22,9 @@ public class PlayerController : MonoBehaviour
     private bool _isBlocksJump;
     private bool _isGrounded;
 
+    public event Action<bool> OnGrounded;
+    public event Action<bool> OnRunning;
+    public event Action<bool> OnDirection;
     private event Action MoveUpdate;
 
     private void Awake()
@@ -38,9 +38,10 @@ public class PlayerController : MonoBehaviour
         _layerObstacle = 64;                                // Слой номер 6
 
         _rigidbody = GetComponent<Rigidbody2D>();
-        //_collider = GetComponent<CapsuleCollider2D>();
         _playerInputActions = new PlayerInputActions();
-        _groundChecker.TryGetComponent<CapsuleCollider2D>(out _groundCheckCollider);
+
+        if (_groundChecker.TryGetComponent<CapsuleCollider2D>(out _groundCheckCollider) == false)
+            throw new NullReferenceException(nameof(CapsuleCollider2D));
     }
 
     private void OnEnable()
@@ -81,20 +82,29 @@ public class PlayerController : MonoBehaviour
 
         if (_onMove == false)
         {
-            MoveUpdate += Move;
             _onMove = true;
+            MoveUpdate += Move;
+            OnRunning?.Invoke(_onMove);
+
+            if (_inputVector.x < 0)
+                OnDirection?.Invoke(true);
+            else
+                OnDirection?.Invoke(false);
         }
     }
 
     private void MoveDisable(InputAction.CallbackContext obj)
     {
-        MoveUpdate -= Move;
         _onMove = false;
+        MoveUpdate -= Move;
+        OnRunning?.Invoke(_onMove);
     }
 
     private void GroundCheck()
     {
         _isGrounded = Physics2D.OverlapCapsule(_groundChecker.position, _groundCheckCollider.size, CapsuleDirection2D.Horizontal, 0, _layerObstacle);
+
+        OnGrounded?.Invoke(_isGrounded);
     }
 
     private void MoveCalculate()
@@ -111,8 +121,8 @@ public class PlayerController : MonoBehaviour
     {
         if (_onJump == false)
         {
-            MoveUpdate += Jump;
             _onJump = true;
+            MoveUpdate += Jump;
         }
     }
 
