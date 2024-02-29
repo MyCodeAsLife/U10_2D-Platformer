@@ -1,30 +1,26 @@
+using System;
 using System.Collections;
 using UnityEngine;
 
-//[RequireComponent(typeof(Animator))]
-[RequireComponent(typeof(SpriteRenderer))]
 public class EnemyController : MonoBehaviour
 {
-    //private const string Speed = "Speed";
-
     [SerializeField] private Transform _route;
 
-    private SpriteRenderer _spriteRenderer;
     private Transform[] _waypoints;
     private Transform _targetPoint;
-    //private Animator _animator;
 
+    private bool _isLeft;
     private int _nextPointIndex;
     private float _moveSpeed;
     private float _minDistance;
+    private float _newPosX;
 
-    private void Awake()
-    {
-        _spriteRenderer = GetComponent<SpriteRenderer>();
-    }
+    public event Action<bool> OnRunning;
+    public event Action<bool> OnDirection;
 
     private void Start()
     {
+        _isLeft = false;
         _minDistance = 1.3f;
         _moveSpeed = 3;
         _waypoints = new Transform[_route.childCount];
@@ -33,45 +29,44 @@ public class EnemyController : MonoBehaviour
             _waypoints[i] = _route.GetChild(i);
 
         _targetPoint = _waypoints[_nextPointIndex];
-        //_animator = GetComponent<Animator>();
-
         StartCoroutine(Movement());
-    }
-
-    private void Rotate()
-    {
-        _spriteRenderer.flipX = !_spriteRenderer.flipX;
     }
 
     private void Move()
     {
-        transform.position = new Vector2(Mathf.MoveTowards(transform.position.x, _targetPoint.position.x, _moveSpeed * Time.deltaTime), transform.position.y);
+        _newPosX = Mathf.MoveTowards(transform.position.x, _targetPoint.position.x, _moveSpeed * Time.deltaTime);
+
+        if (_newPosX - transform.position.x < 0)
+            _isLeft = false;
+        else
+            _isLeft = true;
+
+        OnDirection?.Invoke(_isLeft);
+        transform.position = new Vector2(_newPosX, transform.position.y);
     }
 
     private IEnumerator Movement()
     {
         const float Second = 3.5f;
         bool isMove = true;
-
         var wait = new WaitForSeconds(Second);
+
 
         while (isMove)
         {
             Move();
-            Rotate();       // ƒобавить условие дл€ поворота(доп тригер?). ≈сли скорость > 0 то идем в право, иначе в лево.
+            OnRunning?.Invoke(true);
 
             float distance = Vector2.Distance(transform.position, _targetPoint.position);
 
             if (distance <= _minDistance)
             {
-                //_animator.SetFloat(Speed, 0);
-
+                OnRunning?.Invoke(false);
                 _nextPointIndex = (_nextPointIndex + 1) % _waypoints.Length;
                 _targetPoint = _waypoints[_nextPointIndex];
                 yield return wait;
-
-                //_animator.SetFloat(Speed, _moveSpeed);
             }
+
             yield return null;
         }
     }

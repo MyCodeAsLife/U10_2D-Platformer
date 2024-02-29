@@ -80,16 +80,15 @@ public class PlayerController : MonoBehaviour
     {
         MoveCalculate();
 
+        if (_inputVector.x < 0)
+            OnDirection?.Invoke(true);
+        else if (_inputVector.x > 0)
+            OnDirection?.Invoke(false);
+
         if (_onMove == false)
         {
             _onMove = true;
             MoveUpdate += Move;
-            OnRunning?.Invoke(_onMove);
-
-            if (_inputVector.x < 0)
-                OnDirection?.Invoke(true);
-            else
-                OnDirection?.Invoke(false);
         }
     }
 
@@ -114,6 +113,11 @@ public class PlayerController : MonoBehaviour
 
     private void Move()
     {
+        if ((int)_inputVector.x != 0)
+            OnRunning?.Invoke(true);
+        else
+            OnRunning?.Invoke(false);
+
         _rigidbody.velocity = new Vector2(_inputVector.x * _moveSpeed * Time.deltaTime, _rigidbody.velocity.y);
     }
 
