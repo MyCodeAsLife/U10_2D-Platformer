@@ -35,7 +35,7 @@ public class PlayerController : MonoBehaviour
 
         _moveSpeed = 19f;
         _jumpPower = 670f;
-        _layerObstacle = 64;                                // Слой номер 6
+        _layerObstacle = 64;
 
         _rigidbody = GetComponent<Rigidbody2D>();
         _playerInputActions = new PlayerInputActions();

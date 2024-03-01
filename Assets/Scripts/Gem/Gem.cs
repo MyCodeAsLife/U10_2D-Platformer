@@ -28,7 +28,7 @@ public class Gem : MonoBehaviour
         StopAllCoroutines();
     }
 
-    private void OnDestroy()            ////
+    private void OnDestroy()
     {
         OnPickup?.Invoke();
     }
