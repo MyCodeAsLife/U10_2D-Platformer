@@ -33,8 +33,8 @@ public class PlayerController : MonoBehaviour
         _onJump = false;
         _isBlocksJump = false;
 
-        _moveSpeed = 15f;
-        _jumpPower = 650f;
+        _moveSpeed = 19f;
+        _jumpPower = 670f;
         _layerObstacle = 64;                                // Слой номер 6
 
         _rigidbody = GetComponent<Rigidbody2D>();

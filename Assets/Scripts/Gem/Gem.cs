@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using UnityEngine;
 
@@ -7,10 +8,13 @@ public class Gem : MonoBehaviour
     private readonly int ShineTrigger = Animator.StringToHash("isShine");
 
     private Animator _animator;
-    //private SpriteRenderer _spriteRenderer;
+    private int _UILayer;
+
+    public event Action OnPickup;
 
     private void Awake()
     {
+        _UILayer = LayerMask.GetMask("UI");
         _animator = GetComponent<Animator>();
     }
 
@@ -22,6 +26,17 @@ public class Gem : MonoBehaviour
     private void OnDisable()
     {
         StopAllCoroutines();
+    }
+
+    private void OnDestroy()            ////
+    {
+        OnPickup?.Invoke();
+    }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.IsTouchingLayers(_UILayer))
+            OnPickup?.Invoke();
     }
 
     private IEnumerator Shine()
