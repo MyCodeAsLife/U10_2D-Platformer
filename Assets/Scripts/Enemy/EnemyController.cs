@@ -9,7 +9,7 @@ public class EnemyController : MonoBehaviour
     private Transform[] _waypoints;
     private Transform _targetPoint;
 
-    private bool _isLeft;
+    private bool _isRight;
     private int _nextPointIndex;
     private float _moveSpeed;
     private float _minDistance;
@@ -20,7 +20,7 @@ public class EnemyController : MonoBehaviour
 
     private void Start()
     {
-        _isLeft = false;
+        _isRight = false;
         _minDistance = 1.3f;
         _moveSpeed = 3;
         _waypoints = new Transform[_route.childCount];
@@ -35,8 +35,8 @@ public class EnemyController : MonoBehaviour
     private void Move()
     {
         _newPosX = Mathf.MoveTowards(transform.position.x, _targetPoint.position.x, _moveSpeed * Time.deltaTime);
-        _isLeft = (_newPosX - transform.position.x > 0);
-        OnDirection?.Invoke(_isLeft);
+        _isRight = (_newPosX - transform.position.x > 0);
+        OnDirection?.Invoke(_isRight);
         transform.position = new Vector2(_newPosX, transform.position.y);
     }
 

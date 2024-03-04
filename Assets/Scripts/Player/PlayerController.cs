@@ -113,11 +113,7 @@ public class PlayerController : MonoBehaviour
 
     private void Move()
     {
-        if ((int)_inputVector.x != 0)
-            OnRunning?.Invoke(true);
-        else
-            OnRunning?.Invoke(false);
-
+        OnRunning?.Invoke((int)_inputVector.x != 0);
         _rigidbody.velocity = new Vector2(_inputVector.x * _moveSpeed * Time.deltaTime, _rigidbody.velocity.y);
     }
 
