@@ -7,8 +7,8 @@ public class PlayerAnimationController : AnimationController
     private void Awake()
     {
         _animator = GetComponent<Animator>();
-        _playerController = GetComponentInParent<PlayerController>();
         _spriteRenderer = GetComponent<SpriteRenderer>();
+        _playerController = GetComponentInParent<PlayerController>();
     }
 
     private void OnEnable()

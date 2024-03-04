@@ -35,12 +35,7 @@ public class EnemyController : MonoBehaviour
     private void Move()
     {
         _newPosX = Mathf.MoveTowards(transform.position.x, _targetPoint.position.x, _moveSpeed * Time.deltaTime);
-
-        if (_newPosX - transform.position.x < 0)
-            _isLeft = false;
-        else
-            _isLeft = true;
-
+        _isLeft = (_newPosX - transform.position.x > 0);
         OnDirection?.Invoke(_isLeft);
         transform.position = new Vector2(_newPosX, transform.position.y);
     }
@@ -50,7 +45,6 @@ public class EnemyController : MonoBehaviour
         const float Second = 3.5f;
         bool isMove = true;
         var wait = new WaitForSeconds(Second);
-
 
         while (isMove)
         {

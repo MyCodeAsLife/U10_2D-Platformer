@@ -692,7 +692,7 @@ GameObject:
   m_Component:
   - component: {fileID: 769350867}
   - component: {fileID: 769350866}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Grid
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2282,7 +2282,7 @@ GameObject:
   - component: {fileID: 1455117234}
   - component: {fileID: 1455117236}
   - component: {fileID: 1455117235}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Background
   m_TagString: Untagged
   m_Icon: {fileID: 0}

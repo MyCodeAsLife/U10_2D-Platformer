@@ -6,19 +6,21 @@ public class Spawner : MonoBehaviour
     [SerializeField] private Gem _prefab;
     [SerializeField] private Transform _points;
 
-    private Gem _gem;
     private Transform[] _spawnPoints;
+    private WaitForSeconds _delay;
+    private Gem _gem;
     private float _timeRespawn;
 
 
     private void Start()
     {
         _spawnPoints = new Transform[_points.childCount];
+        _timeRespawn = 2.5f;
+        _delay = new WaitForSeconds(_timeRespawn);
 
         for (int i = 0; i < _spawnPoints.Length; i++)
             _spawnPoints[i] = _points.GetChild(i);
 
-        _timeRespawn = 2.5f;
         StartCoroutine(Spawn());
     }
 
@@ -37,7 +39,7 @@ public class Spawner : MonoBehaviour
 
     private IEnumerator Spawn()
     {
-        yield return new WaitForSeconds(_timeRespawn);
+        yield return _delay;
 
         int randomIndex = Random.Range(0, _spawnPoints.Length);
         _gem = Instantiate(_prefab, _spawnPoints[randomIndex].position, Quaternion.identity);

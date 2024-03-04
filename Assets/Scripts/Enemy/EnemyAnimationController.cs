@@ -7,8 +7,8 @@ public class EnemyAnimationController : AnimationController
     private void Awake()
     {
         _animator = GetComponent<Animator>();
-        _enemyController = GetComponentInParent<EnemyController>();
         _spriteRenderer = GetComponent<SpriteRenderer>();
+        _enemyController = GetComponentInParent<EnemyController>();
     }
 
     private void OnEnable()
