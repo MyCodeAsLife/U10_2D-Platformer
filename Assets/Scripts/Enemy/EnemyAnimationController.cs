@@ -1,25 +1,28 @@
 using UnityEngine;
 
-public class EnemyAnimationController : AnimationController
+namespace Game
 {
-    private EnemyController _enemyController;
-
-    private void Awake()
+    public class EnemyAnimationController : AnimationController
     {
-        _animator = GetComponent<Animator>();
-        _spriteRenderer = GetComponent<SpriteRenderer>();
-        _enemyController = GetComponentInParent<EnemyController>();
-    }
+        private EnemyController _enemyController;
 
-    private void OnEnable()
-    {
-        _enemyController.OnRunning += SwitchRunning;
-        _enemyController.OnDirection += SwitchDirection;
-    }
+        private void Awake()
+        {
+            _animator = GetComponent<Animator>();
+            _spriteRenderer = GetComponent<SpriteRenderer>();
+            _enemyController = GetComponentInParent<EnemyController>();
+        }
 
-    private void OnDisable()
-    {
-        _enemyController.OnRunning -= SwitchRunning;
-        _enemyController.OnDirection -= SwitchDirection;
+        private void OnEnable()
+        {
+            _enemyController.OnRunning += SwitchRunning;
+            _enemyController.OnDirection += SwitchDirection;
+        }
+
+        private void OnDisable()
+        {
+            _enemyController.OnRunning -= SwitchRunning;
+            _enemyController.OnDirection -= SwitchDirection;
+        }
     }
 }

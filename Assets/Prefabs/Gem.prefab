@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 6874821791528759902}
   - component: {fileID: 2343096317213646665}
   - component: {fileID: 3697869549910856117}
-  m_Layer: 5
+  m_Layer: 7
   m_Name: Gem
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -155,6 +155,3 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4b07c16d3860b524b89e2fcacca0cfcf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _player:
-    serializedVersion: 2
-    m_Bits: 0

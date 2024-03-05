@@ -2,52 +2,48 @@ using System;
 using System.Collections;
 using UnityEngine;
 
-[RequireComponent(typeof(Animator))]
-public class Gem : MonoBehaviour
+namespace Game
 {
-    private readonly int ShineTrigger = Animator.StringToHash("isShine");
-
-    private Animator _animator;
-    private int _UILayer;
-
-    public event Action OnPickup;
-
-    private void Awake()
+    [RequireComponent(typeof(Animator))]
+    public class Gem : MonoBehaviour
     {
-        _UILayer = LayerMask.GetMask("UI");
-        _animator = GetComponent<Animator>();
-    }
+        private readonly int ShineTrigger = Animator.StringToHash("isShine");
 
-    private void OnEnable()
-    {
-        StartCoroutine(Shine());
-    }
+        private Animator _animator;
 
-    private void OnDisable()
-    {
-        StopAllCoroutines();
-    }
+        public event Action OnPickup;
 
-    private void OnDestroy()
-    {
-        OnPickup?.Invoke();
-    }
-
-    private void OnTriggerEnter2D(Collider2D collision)
-    {
-        if (collision.IsTouchingLayers(_UILayer))
-            OnPickup?.Invoke();
-    }
-
-    private IEnumerator Shine()
-    {
-        const float Second = 3f;
-        var wait = new WaitForSeconds(Second);
-
-        while (true)
+        private void Awake()
         {
-            _animator.SetTrigger(ShineTrigger);
-            yield return wait;
+            _animator = GetComponent<Animator>();
+        }
+
+        private void OnEnable()
+        {
+            StartCoroutine(Shine());
+        }
+
+        private void OnDisable()
+        {
+            StopAllCoroutines();
+        }
+
+        private void OnTriggerEnter2D(Collider2D collision)
+        {
+            if (collision.TryGetComponent<PlayerController>(out PlayerController enemy))
+                OnPickup?.Invoke();
+        }
+
+        private IEnumerator Shine()
+        {
+            const float Second = 3f;
+            var wait = new WaitForSeconds(Second);
+
+            while (true)
+            {
+                _animator.SetTrigger(ShineTrigger);
+                yield return wait;
+            }
         }
     }
 }

@@ -1,48 +1,34 @@
 using System.Collections;
 using UnityEngine;
 
-public class Spawner : MonoBehaviour
+namespace Game
 {
-    [SerializeField] private Gem _prefab;
-    [SerializeField] private Transform _points;
-
-    private Transform[] _spawnPoints;
-    private WaitForSeconds _delay;
-    private Gem _gem;
-    private float _timeRespawn;
-
-
-    private void Start()
+    public class GemSpawner : Spawner
     {
-        _spawnPoints = new Transform[_points.childCount];
-        _timeRespawn = 2.5f;
-        _delay = new WaitForSeconds(_timeRespawn);
+        [SerializeField] private Gem _prefab;
 
-        for (int i = 0; i < _spawnPoints.Length; i++)
-            _spawnPoints[i] = _points.GetChild(i);
+        private Gem _gem;
 
-        StartCoroutine(Spawn());
-    }
+        private void Start()
+        {
+            StartCoroutine(Spawn());
+        }
 
-    private void OnDisable()
-    {
-        _gem.OnPickup -= GemPickup;
-    }
+        public void Pickup()
+        {
+            _gem.OnPickup -= Pickup;
+            Destroy(_gem.gameObject);
+            StopAllCoroutines();
+            StartCoroutine(Spawn());
+        }
 
-    public void GemPickup()
-    {
-        _gem.OnPickup -= GemPickup;
-        Destroy(_gem.gameObject);
-        StopAllCoroutines();
-        StartCoroutine(Spawn());
-    }
+        private IEnumerator Spawn()
+        {
+            yield return _delay;
 
-    private IEnumerator Spawn()
-    {
-        yield return _delay;
-
-        int randomIndex = Random.Range(0, _spawnPoints.Length);
-        _gem = Instantiate(_prefab, _spawnPoints[randomIndex].position, Quaternion.identity);
-        _gem.OnPickup += GemPickup;
+            int randomIndex = Random.Range(0, _spawnPoints.Length);
+            _gem = Instantiate(_prefab, _spawnPoints[randomIndex].position, Quaternion.identity);
+            _gem.OnPickup += Pickup;
+        }
     }
 }

@@ -1,28 +1,30 @@
 using UnityEngine;
 
-public class PlayerAnimationController : AnimationController
+namespace Game
 {
-    private PlayerController _playerController;
-
-    private void Awake()
+    public class PlayerAnimationController : AnimationController
     {
-        _animator = GetComponent<Animator>();
-        _spriteRenderer = GetComponent<SpriteRenderer>();
-        _playerController = GetComponentInParent<PlayerController>();
-    }
+        private PlayerController _playerController;
 
-    private void OnEnable()
-    {
-        _playerController.OnRunning += SwitchRunning;
-        _playerController.OnGrounded += SwitchGrounded;
-        _playerController.OnDirection += SwitchDirection;
-    }
+        private void Awake()
+        {
+            _animator = GetComponent<Animator>();
+            _spriteRenderer = GetComponent<SpriteRenderer>();
+            _playerController = GetComponentInParent<PlayerController>();
+        }
 
-    private void OnDisable()
-    {
-        _playerController.OnRunning -= SwitchRunning;
-        _playerController.OnGrounded -= SwitchGrounded;
-        _playerController.OnDirection -= SwitchDirection;
+        private void OnEnable()
+        {
+            _playerController.OnRunning += SwitchRunning;
+            _playerController.OnGrounded += SwitchGrounded;
+            _playerController.OnDirection += SwitchDirection;
+        }
+
+        private void OnDisable()
+        {
+            _playerController.OnRunning -= SwitchRunning;
+            _playerController.OnGrounded -= SwitchGrounded;
+            _playerController.OnDirection -= SwitchDirection;
+        }
     }
 }
-
