@@ -10,15 +10,14 @@ namespace Game
     {
         [SerializeField] private LayerMask _layerObstacle;
         [SerializeField] private Transform _groundChecker;
+        [SerializeField] private float _moveSpeed;
+        [SerializeField] private float _jumpPower;
 
         private PlayerInputActions _playerInputActions;
         private Rigidbody2D _rigidbody;
         private CapsuleCollider2D _groundCheckCollider;
 
         private Vector2 _inputVector;
-        private float _moveSpeed;
-        private float _jumpPower;
-
         private bool _onMove;
         private bool _onJump;
         private bool _isBlocksJump;
@@ -34,9 +33,6 @@ namespace Game
             _onMove = false;
             _onJump = false;
             _isBlocksJump = false;
-
-            _moveSpeed = 19f;
-            _jumpPower = 670f;
             _layerObstacle = 64;
 
             _rigidbody = GetComponent<Rigidbody2D>();

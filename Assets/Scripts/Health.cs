@@ -1,35 +1,53 @@
-using UnityEngine;
-using UnityEngine.UI;
+using System;
 
 namespace Game
 {
-    public class Health : MonoBehaviour
+    public class Health
     {
-        [SerializeField] private Slider _healthbar;
-
         private float _health;
+        private float _maxHealth;
 
-        public void Healing(float healthPoints)
+        public event Action<float> HealthChanged;
+
+        public Health()
         {
-            if (healthPoints > 0)
-            {
-                _health += healthPoints;
+            _maxHealth = 100;
+            _health = _maxHealth;
+        }
 
-                if (_health > 100)
-                    _health = 100;
+        public Health(float maxHealth)
+        {
+            _maxHealth = maxHealth;
+            _health = _maxHealth;
+        }
+
+        public float Value { get { return _health; } }
+        public float MaxValue { get { return _maxHealth; } }
+
+        public void Increase(float points)
+        {
+            if (points > 0 && _health < _maxHealth)
+            {
+                _health += points;
+
+                if (_health > _maxHealth)
+                    _health = _maxHealth;
+
+                HealthChanged?.Invoke(_health);
             }
         }
 
-        private void Start()
+        public void Decrease(float points)
         {
-            _health = 100;
-            _healthbar.value = _health;
-        }
+            if (points > 0)
+            {
+                _health -= points;
 
-        private void LateUpdate()
-        {
-            _health -= 0.1f;
-            _healthbar.value = _health;
+                if (_health < 0)
+                    _health = 0;
+
+                HealthChanged?.Invoke(_health);
+            }
         }
     }
 }
