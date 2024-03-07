@@ -17,20 +17,24 @@ namespace Game
         private Rigidbody2D _rigidbody;
         private CapsuleCollider2D _groundCheckCollider;
 
-        private Vector2 _inputVector;
-        private bool _onMove;
+        private Vector2 _newInputVector;
+        private bool _onMoveHorizontal;
+        private bool _onMoveVertical;
         private bool _onJump;
         private bool _isBlocksJump;
         private bool _isGrounded;
+        private bool _flipX;
 
         public event Action<bool> OnGrounded;
         public event Action<bool> OnRunning;
         public event Action<bool> OnDirection;
+        public event Action<bool, bool> OnAttack;
         private event Action MoveUpdate;
 
         private void Awake()
         {
-            _onMove = false;
+            _onMoveVertical = false;
+            _onMoveHorizontal = false;
             _onJump = false;
             _isBlocksJump = false;
             _layerObstacle = 64;
@@ -45,18 +49,26 @@ namespace Game
         private void OnEnable()
         {
             _playerInputActions.Enable();
-            _playerInputActions.Movement.Move.performed += MoveEnable;
-            _playerInputActions.Movement.Move.canceled += MoveDisable;
             _playerInputActions.Movement.Jump.performed += JumpEnable;
             _playerInputActions.Movement.Jump.canceled += JumpDisable;
+            _playerInputActions.Movement.MoveHorizontal.performed += MoveHorizontalEnable;
+            _playerInputActions.Movement.MoveVertical.performed += MoveVerticalEnable;
+            _playerInputActions.Movement.MoveHorizontal.canceled += MoveHorizontalDisable;
+            _playerInputActions.Movement.MoveVertical.canceled += MoveVerticalDisable;
+            _playerInputActions.Movement.Attack.performed += AttackEnable;
+            _playerInputActions.Movement.Attack.canceled += AttackDisable;
         }
 
         private void OnDisable()
         {
-            _playerInputActions.Movement.Move.performed -= MoveEnable;
-            _playerInputActions.Movement.Move.canceled -= MoveDisable;
             _playerInputActions.Movement.Jump.performed -= JumpEnable;
             _playerInputActions.Movement.Jump.canceled -= JumpDisable;
+            _playerInputActions.Movement.MoveHorizontal.performed -= MoveHorizontalEnable;
+            _playerInputActions.Movement.MoveVertical.performed -= MoveVerticalEnable;
+            _playerInputActions.Movement.MoveHorizontal.canceled -= MoveHorizontalDisable;
+            _playerInputActions.Movement.MoveVertical.canceled -= MoveVerticalDisable;
+            _playerInputActions.Movement.Attack.performed -= AttackEnable;
+            _playerInputActions.Movement.Attack.canceled -= AttackDisable;
             _playerInputActions.Disable();
 
             StopAllCoroutines();
@@ -72,29 +84,50 @@ namespace Game
             MoveUpdate?.Invoke();
         }
 
-        private Vector2 GetMovementVector() => _playerInputActions.Movement.Move.ReadValue<Vector2>();
+        private float GetMovementHorizontalVector() => _playerInputActions.Movement.MoveHorizontal.ReadValue<float>();
+        private float GetMovementVerticalVector() => _playerInputActions.Movement.MoveVertical.ReadValue<float>();
 
-        private void MoveEnable(InputAction.CallbackContext obj)
+        private void MoveHorizontalEnable(InputAction.CallbackContext obj)
         {
-            MoveCalculate();
+            MoveHorizontalCalculate();
 
-            if (_inputVector.x < 0)
-                OnDirection?.Invoke(true);
-            else if (_inputVector.x > 0)
-                OnDirection?.Invoke(false);
+            if (_newInputVector.x < 0)
+                _flipX = true;
+            else if (_newInputVector.x > 0)
+                _flipX = false;
 
-            if (_onMove == false)
+            OnDirection?.Invoke(_flipX);
+
+            if (_onMoveHorizontal == false)
             {
-                _onMove = true;
-                MoveUpdate += Move;
+                _onMoveHorizontal = true;
+                MoveUpdate += MoveHorizontal;
             }
         }
 
-        private void MoveDisable(InputAction.CallbackContext obj)
+        private void MoveVerticalEnable(InputAction.CallbackContext obj)
         {
-            _onMove = false;
-            MoveUpdate -= Move;
-            OnRunning?.Invoke(_onMove);
+            MoveVerticalCalculate();
+
+            if (_onMoveVertical == false)
+            {
+                _onMoveVertical = true;
+                MoveUpdate += MoveVertical;
+            }
+        }
+
+        private void MoveHorizontalDisable(InputAction.CallbackContext obj)
+        {
+            _onMoveHorizontal = false;
+            MoveUpdate -= MoveHorizontal;
+
+            OnRunning?.Invoke(_onMoveHorizontal);
+        }
+
+        private void MoveVerticalDisable(InputAction.CallbackContext obj)
+        {
+            _onMoveVertical = false;
+            MoveUpdate -= MoveVertical;
         }
 
         private void GroundCheck()
@@ -104,15 +137,25 @@ namespace Game
             OnGrounded?.Invoke(_isGrounded);
         }
 
-        private void MoveCalculate()
+        private void MoveHorizontalCalculate()
         {
-            _inputVector = GetMovementVector().normalized * _moveSpeed;
+            _newInputVector.x = GetMovementHorizontalVector() * _moveSpeed;
         }
 
-        private void Move()
+        private void MoveVerticalCalculate()
         {
-            OnRunning?.Invoke((int)_inputVector.x != 0);
-            _rigidbody.velocity = new Vector2(_inputVector.x * _moveSpeed * Time.deltaTime, _rigidbody.velocity.y);
+            _newInputVector.y = GetMovementVerticalVector() * _moveSpeed;
+        }
+
+        private void MoveHorizontal()
+        {
+            OnRunning?.Invoke((int)_newInputVector.x != 0);
+            _rigidbody.velocity = new Vector2(_newInputVector.x * _moveSpeed * Time.deltaTime, _rigidbody.velocity.y);
+        }
+
+        private void MoveVertical()
+        {
+            _rigidbody.velocity = new Vector2(_rigidbody.velocity.x, _newInputVector.y * _moveSpeed * Time.deltaTime);
         }
 
         private void JumpEnable(InputAction.CallbackContext obj)
@@ -140,6 +183,16 @@ namespace Game
 
                 StartCoroutine(UnlockJump());
             }
+        }
+
+        private void AttackEnable(InputAction.CallbackContext obj)
+        {
+            OnAttack?.Invoke(true, _flipX);
+        }
+
+        private void AttackDisable(InputAction.CallbackContext obj)
+        {
+            OnAttack?.Invoke(false, _flipX);
         }
 
         private IEnumerator UnlockJump()

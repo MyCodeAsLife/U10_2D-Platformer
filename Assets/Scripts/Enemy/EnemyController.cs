@@ -19,6 +19,7 @@ namespace Game
 
         public event Action<bool> OnRunning;
         public event Action<bool> OnDirection;
+        public event Action<bool, bool> OnAttack;                     //
 
         private void Start()
         {

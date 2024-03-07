@@ -2,14 +2,14 @@ using UnityEngine;
 
 namespace Game
 {
-    [RequireComponent(typeof(PlayerController))]
-    public class Player : Character
+    [RequireComponent(typeof(EnemyController))]
+    public class Enemy : Character
     {
-        private PlayerController _controller;
+        private EnemyController _controller;
 
         private void Awake()
         {
-            _controller = GetComponent<PlayerController>();
+            _controller = GetComponent<EnemyController>();
         }
 
         private void OnEnable()

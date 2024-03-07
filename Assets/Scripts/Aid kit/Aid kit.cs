@@ -11,7 +11,7 @@ namespace Game
 
         private void OnTriggerEnter2D(Collider2D collision)
         {
-            if (collision.TryGetComponent<Player>(out Player character))
+            if (collision.TryGetComponent<Character>(out Character character))
             {
                 OnPickup?.Invoke();
                 character.Healing(_healtPoints);

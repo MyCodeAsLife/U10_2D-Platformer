@@ -6,7 +6,7 @@ namespace Game
     public class UI : MonoBehaviour
     {
         [SerializeField] private Slider _healthbar;
-        [SerializeField] private Player _player;
+        [SerializeField] private Character _player;
 
         private void OnDisable()
         {
