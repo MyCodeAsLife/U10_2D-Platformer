@@ -14,12 +14,14 @@ namespace Game
 
         private void OnEnable()
         {
-            _controller.OnAttack += AttackChange;
+            _controller.OnAttack += ChangeAttackState;
+            _controller.OnDirection += ChangeDirection;
         }
 
         private void OnDisable()
         {
-            _controller.OnAttack -= AttackChange;
+            _controller.OnAttack -= ChangeAttackState;
+            _controller.OnDirection -= ChangeDirection;
         }
     }
 }

@@ -17,7 +17,7 @@ namespace Game
         private Rigidbody2D _rigidbody;
         private CapsuleCollider2D _groundCheckCollider;
 
-        private Vector2 _newInputVector;
+        private Vector2 _InputVector;
         private bool _onMoveHorizontal;
         private bool _onMoveVertical;
         private bool _onJump;
@@ -28,7 +28,7 @@ namespace Game
         public event Action<bool> OnGrounded;
         public event Action<bool> OnRunning;
         public event Action<bool> OnDirection;
-        public event Action<bool, bool> OnAttack;
+        public event Action<bool> OnAttack;
         private event Action MoveUpdate;
 
         private void Awake()
@@ -74,13 +74,9 @@ namespace Game
             StopAllCoroutines();
         }
 
-        private void LateUpdate()
+        private void FixedUpdate()
         {
             GroundCheck();
-        }
-
-        private void Update()
-        {
             MoveUpdate?.Invoke();
         }
 
@@ -91,9 +87,9 @@ namespace Game
         {
             MoveHorizontalCalculate();
 
-            if (_newInputVector.x < 0)
+            if (_InputVector.x < 0)
                 _flipX = true;
-            else if (_newInputVector.x > 0)
+            else if (_InputVector.x > 0)
                 _flipX = false;
 
             OnDirection?.Invoke(_flipX);
@@ -139,23 +135,23 @@ namespace Game
 
         private void MoveHorizontalCalculate()
         {
-            _newInputVector.x = GetMovementHorizontalVector() * _moveSpeed;
+            _InputVector.x = GetMovementHorizontalVector() * _moveSpeed;
         }
 
         private void MoveVerticalCalculate()
         {
-            _newInputVector.y = GetMovementVerticalVector() * _moveSpeed;
+            _InputVector.y = GetMovementVerticalVector() * _moveSpeed;
         }
 
         private void MoveHorizontal()
         {
-            OnRunning?.Invoke((int)_newInputVector.x != 0);
-            _rigidbody.velocity = new Vector2(_newInputVector.x * _moveSpeed * Time.deltaTime, _rigidbody.velocity.y);
+            OnRunning?.Invoke((int)_InputVector.x != 0);
+            _rigidbody.velocity = new Vector2(_InputVector.x * _moveSpeed * Time.deltaTime, _rigidbody.velocity.y);
         }
 
         private void MoveVertical()
         {
-            _rigidbody.velocity = new Vector2(_rigidbody.velocity.x, _newInputVector.y * _moveSpeed * Time.deltaTime);
+            _rigidbody.velocity = new Vector2(_rigidbody.velocity.x, _InputVector.y * _moveSpeed * Time.deltaTime);
         }
 
         private void JumpEnable(InputAction.CallbackContext obj)
@@ -187,12 +183,12 @@ namespace Game
 
         private void AttackEnable(InputAction.CallbackContext obj)
         {
-            OnAttack?.Invoke(true, _flipX);
+            OnAttack?.Invoke(true);
         }
 
         private void AttackDisable(InputAction.CallbackContext obj)
         {
-            OnAttack?.Invoke(false, _flipX);
+            OnAttack?.Invoke(false);
         }
 
         private IEnumerator UnlockJump()

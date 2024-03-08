@@ -15,7 +15,8 @@ namespace Game
         private float _damage;
         private float _attackSpeed;
 
-        protected bool IsAttack;
+        private bool _flipX;
+        private bool _isAttack;
 
         private void Start()
         {
@@ -23,7 +24,8 @@ namespace Game
             _armor = 0.05f;
             _damage = 10f;
             _attackSpeed = 0.3f;
-            IsAttack = false;
+            _flipX = false;
+            _isAttack = false;
         }
 
         private void OnDisable()
@@ -33,8 +35,6 @@ namespace Game
 
         public float MaxHealtValue { get { return _health.MaxValue; } }
         public float HealthValue { get { return _health.Value; } }
-        //public float Damage { get { return _damage; } }
-        //public float AttackSpeed { get { return _attackSpeed; } }
 
         public void HealChangeSubscribe(Action<float> function)
         {
@@ -58,29 +58,38 @@ namespace Game
             _health.Increase(healthPoints);
         }
 
-        public void AttackChange(bool isAttack, bool flipX)         //
+        public void ChangeAttackState(bool isAttack)
         {
-            IsAttack = isAttack;
+            _isAttack = isAttack;
 
-            if (IsAttack)
-                StartCoroutine(Slash(flipX));
+            if (_isAttack)
+                StartCoroutine(Slash());
         }
 
-        private IEnumerator Slash(bool flipX)
+        public void ChangeDirection(bool flipX)
+        {
+            _flipX = flipX;
+        }
+
+        private IEnumerator Slash()
         {
             WaitForSeconds _delay = new WaitForSeconds(_attackSpeed);
 
-            while (IsAttack)
+            while (_isAttack)
             {
                 Slash slash = Instantiate(_slashPrefab, transform.position, Quaternion.identity);
                 slash.OnHit += Attack;
 
-                if (flipX)
-                    slash.transform.rotation = new Quaternion(slash.transform.rotation.x, 180, slash.transform.rotation.z, slash.transform.rotation.w);
-                else
-                    slash.transform.rotation = new Quaternion(slash.transform.rotation.x, 0, slash.transform.rotation.z, slash.transform.rotation.w);
+                //if (_flipX)
+                //    slash.transform.rotation = new Quaternion(slash.transform.rotation.x, 180, slash.transform.rotation.z, slash.transform.rotation.w);
+                //else
+                //    slash.transform.rotation = new Quaternion(slash.transform.rotation.x, 0, slash.transform.rotation.z, slash.transform.rotation.w);
 
-                //slash.GetComponent<SpriteRenderer>().flipX = true;
+                if (_flipX)
+                    slash.transform.localScale = new Vector3(-1, slash.transform.localScale.y, slash.transform.localScale.z);
+                else
+                    slash.transform.localScale = new Vector3(1, slash.transform.localScale.y, slash.transform.localScale.z);
+
                 slash.gameObject.SetActive(true);
 
                 Destroy(slash.gameObject, 0.1f);
