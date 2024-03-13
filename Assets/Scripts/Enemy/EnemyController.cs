@@ -2,20 +2,19 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 namespace Game
 {
     public class EnemyController : MonoBehaviour
     {
+        [SerializeField] private LayerMask _enemyLayer;
         [SerializeField] private Transform _route;
 
         private List<Character> _enemies = new List<Character>();
         private Transform[] _waypoints;
-        private Transform _targetPoint;
-        //private Transform _targetAttack;
+        private Vector3 _targetPoint;
+        private Coroutine _currentBehavior;
 
-        //private bool _isRight;
         private bool _isEnemyFound;
         private bool _isMove;
         private int _nextPointIndex;
@@ -24,7 +23,7 @@ namespace Game
         private float _minDistance;
         private float _newPosX;
         private float _delayWithAttack;
-        private float _distanceToTarget;
+        private float _distanceToTargetX;
 
         public event Action<bool> OnRunning;
         public event Action<bool> OnDirection;
@@ -46,8 +45,7 @@ namespace Game
         private void Start()
         {
             _isEnemyFound = false;
-            //_isRight = false;
-            _minDistance = 1.3f;
+            _minDistance = 1.2f;
             _moveSpeed = 3f;
             _delayWithAttack = 0.5f;
             _waypoints = new Transform[_route.childCount];
@@ -55,14 +53,17 @@ namespace Game
             for (int i = 0; i < _waypoints.Length; i++)
                 _waypoints[i] = _route.GetChild(i);
 
-            _targetPoint = _waypoints[_nextPointIndex];
-            StartCoroutine(Patrolling());
+            _targetPoint = _waypoints[_nextPointIndex].position;
+            ChoosePatrol();
         }
 
-        private void OnTriggerEnter2D(Collider2D collision)
+        private void OnTriggerEnter2D(Collider2D collision)                     // Добавить рейкаст для определения что цель в зоне видимости
         {
             if (collision.TryGetComponent<Player>(out Player enemy))
             {
+                Vector2.
+                Physics2D.Raycast(transform.position, /*((enemy.transform.position - transform.position).normalized)*/, );
+
                 if (_enemies.Contains(enemy) == false)
                 {
                     _enemies.Add(enemy);
@@ -71,9 +72,19 @@ namespace Game
                 if (_isEnemyFound == false)
                 {
                     _isEnemyFound = true;
-                    StopAllCoroutines();
-                    StartCoroutine(ChangeAttackState());
+                    ChooseAttack();
                 }
+            }
+        }
+
+        private void OnTriggerExit2D(Collider2D collision)
+        {
+            if (collision.TryGetComponent<Player>(out Player enemy))
+            {
+                Debug.Log("Exit");
+
+                AttackTargetSelect();
+                _enemies.Remove(enemy);
             }
         }
 
@@ -84,9 +95,6 @@ namespace Game
 
         private void Move()
         {
-            //_newPosX = Mathf.MoveTowards(transform.position.x, _targetPoint.position.x, _moveSpeed * Time.deltaTime);
-            //_isRight = (_newPosX - transform.position.x > 0);
-            //OnDirection?.Invoke(_isRight);
             transform.position = new Vector2(_newPosX, transform.position.y);
         }
 
@@ -98,23 +106,19 @@ namespace Game
 
         private void MoveCalculate()
         {
-            _newPosX = Mathf.MoveTowards(transform.position.x, _targetPoint.position.x, _moveSpeed * Time.deltaTime);
-            //_distanceToTarget = Vector2.Distance(transform.position, _targetPoint.position);
+            _newPosX = Mathf.MoveTowards(transform.position.x, _targetPoint.x, _moveSpeed * Time.deltaTime);
+            _distanceToTargetX = transform.position.x - _targetPoint.x;
 
-            _distanceToTarget = transform.position.x - _targetPoint.position.x;
-
-            if (_distanceToTarget < 0)
-                _distanceToTarget *= -1;
+            if (_distanceToTargetX < 0)
+                _distanceToTargetX *= -1;
         }
 
         private void Movement()
         {
             MoveCalculate();
-            //_distanceToTarget = Vector2.Distance(transform.position, _targetPoint.position);
-            //Debug.Log(_distanceToTarget);
-            //Debug.Log("Movement");
+            Rotate();
 
-            if (_distanceToTarget <= _minDistance)
+            if (_distanceToTargetX <= _minDistance)
             {
                 _isMove = false;
                 OnRunning?.Invoke(_isMove);
@@ -122,42 +126,59 @@ namespace Game
             }
             else
             {
-                Rotate();
                 Move();
                 OnRunning?.Invoke(_isMove);
             }
-
         }
 
-        private void AttackEnable(InputAction.CallbackContext obj)
+        private void AttackEnable()
         {
             OnAttack?.Invoke(true);
         }
 
-        private void AttackDisable(InputAction.CallbackContext obj)
+        private void AttackDisable()
         {
             OnAttack?.Invoke(false);
         }
 
+        private void ChoosePatrol()
+        {
+            if (_currentBehavior != null)
+                StopCoroutine(_currentBehavior);
+
+            _currentBehavior = StartCoroutine(Patrolling());
+        }
+
+        private void ChooseAttack()
+        {
+            if (_currentBehavior != null)
+                StopCoroutine(_currentBehavior);
+
+            _currentBehavior = StartCoroutine(Attack());
+        }
+
         private void AttackTargetSelect()
         {
-            _targetPoint = _enemies[0].transform;
-
-            if (_enemies.Count > 1)
+            if (_enemies.Count > 0)
             {
-                float distanceEnemy1 = Vector2.Distance(transform.position, _targetPoint.position);
+                _targetPoint = _enemies[0].transform.position;
 
-                for (int i = 1; i < _enemies.Count; i++)
+                if (_enemies.Count > 1)
                 {
-                    float distanceEnemy2 = Vector2.Distance(transform.position, _enemies[i].transform.position);
+                    float distanceEnemy1 = Vector2.Distance(transform.position, _targetPoint);
 
-                    if (distanceEnemy2 < distanceEnemy1)
-                        _targetPoint = _enemies[i].transform;
+                    for (int i = 1; i < _enemies.Count; i++)
+                    {
+                        float distanceEnemy2 = Vector2.Distance(transform.position, _enemies[i].transform.position);
+
+                        if (distanceEnemy2 < distanceEnemy1)
+                            _targetPoint = _enemies[i].transform.position;
+                    }
                 }
             }
         }
 
-        private IEnumerator Patrolling()                  // Перенести в Update через событие onMoveUpdate
+        private IEnumerator Patrolling()
         {
             const float Second = 3.5f;
             bool isPatriling = true;
@@ -165,43 +186,52 @@ namespace Game
 
             while (isPatriling)
             {
-                //MoveCalculate();
-                //Rotate();
-                //Move();
-                //OnRunning?.Invoke(true);
-
-                //_distanceToTarget = Vector2.Distance(transform.position, _targetPoint.position);
-
-                if (_distanceToTarget <= _minDistance)
+                if (_distanceToTargetX <= _minDistance)
                 {
                     yield return wait;
-                    //OnRunning?.Invoke(false);
-                    _nextPointIndex = (_nextPointIndex + 1) % _waypoints.Length;
-                    _targetPoint = _waypoints[_nextPointIndex];
 
-                    //if (_isMove == false)
-                    //{
+                    _nextPointIndex = (_nextPointIndex + 1) % _waypoints.Length;
+                    _targetPoint = _waypoints[_nextPointIndex].position;
                     _isMove = true;
                     onMoveUpdate += Movement;
-                    //}
                 }
 
                 yield return null;
             }
         }
 
-        private IEnumerator ChangeAttackState()       // Добавить проверки на расстояние для потери врага из зоны видимости, атаку врага если он рядом(дистанция через вектор2 и ротате) и возврат к патрулированию
+        private IEnumerator Attack()
         {
             yield return new WaitForSeconds(_delayWithAttack);
 
             while (true)
             {
                 AttackTargetSelect();
+                MoveCalculate();
 
-                if (_isMove == false)
+                if (_distanceToTargetX > _minDistance)
                 {
-                    _isMove = true;
-                    onMoveUpdate += Movement;
+                    AttackDisable();
+
+                    if (_isMove == false)
+                    {
+                        _isMove = true;
+                        onMoveUpdate += Movement;
+                    }
+                }
+                else
+                {
+                    float distanceToTarget = Vector2.Distance(transform.position, _targetPoint);
+
+                    if (_enemies.Count > 0 && distanceToTarget < _minDistance)
+                    {
+                        AttackEnable();
+                    }
+                    else
+                    {
+                        _isEnemyFound = false;
+                        ChoosePatrol();
+                    }
                 }
 
                 yield return new WaitForSeconds(_delayWithAttack);
