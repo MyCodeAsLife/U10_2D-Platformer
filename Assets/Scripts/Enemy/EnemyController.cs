@@ -7,17 +7,22 @@ namespace Game
 {
     public class EnemyController : MonoBehaviour
     {
-        [SerializeField] private LayerMask _enemyLayer;
+        [SerializeField] private LayerMask _layerObstacle;
+        [SerializeField] private LayerMask _layerEnemys;
         [SerializeField] private Transform _route;
 
         private List<Character> _enemies = new List<Character>();
         private Transform[] _waypoints;
         private Vector3 _targetPoint;
         private Coroutine _currentBehavior;
+        private Coroutine _stateSelection;
 
-        private bool _isEnemyFound;
-        private bool _isMove;
+        private CharacterState _characterState;
         private int _nextPointIndex;
+
+        private bool _isEnemyInRadius;
+        private bool _isEnemyVisible;
+        private bool _isMove;
 
         private float _moveSpeed;
         private float _minDistance;
@@ -35,44 +40,46 @@ namespace Game
         {
             _isMove = true;
             onMoveUpdate += Movement;
-        }
-
-        private void OnDisable()
-        {
-            onMoveUpdate -= Movement;
-        }
-
-        private void Start()
-        {
-            _isEnemyFound = false;
-            _minDistance = 1.2f;
-            _moveSpeed = 3f;
-            _delayWithAttack = 0.5f;
             _waypoints = new Transform[_route.childCount];
 
             for (int i = 0; i < _waypoints.Length; i++)
                 _waypoints[i] = _route.GetChild(i);
 
             _targetPoint = _waypoints[_nextPointIndex].position;
-            ChoosePatrol();
+            _characterState = CharacterState.Patrolling;
+            _currentBehavior = StartCoroutine(Patrolling());
         }
 
-        private void OnTriggerEnter2D(Collider2D collision)                     // Добавить рейкаст для определения что цель в зоне видимости
+        private void OnDisable()
+        {
+            onMoveUpdate -= Movement;
+            StopAllCoroutines();
+        }
+
+        private void Start()
+        {
+            _isEnemyInRadius = false;
+            _isEnemyVisible = false;
+            _minDistance = 1.2f;
+            _moveSpeed = 3f;
+            _delayWithAttack = 0.5f;
+        }
+
+        private void OnTriggerEnter2D(Collider2D collision)
         {
             if (collision.TryGetComponent<Player>(out Player enemy))
             {
-                Vector2.
-                Physics2D.Raycast(transform.position, /*((enemy.transform.position - transform.position).normalized)*/, );
-
                 if (_enemies.Contains(enemy) == false)
                 {
                     _enemies.Add(enemy);
                 }
 
-                if (_isEnemyFound == false)
+                if (_isEnemyInRadius == false)
                 {
-                    _isEnemyFound = true;
-                    ChooseAttack();
+                    _isEnemyInRadius = true;
+
+                    if (_stateSelection == null)
+                        _stateSelection = StartCoroutine(StateSelection());
                 }
             }
         }
@@ -81,10 +88,10 @@ namespace Game
         {
             if (collision.TryGetComponent<Player>(out Player enemy))
             {
-                Debug.Log("Exit");
-
-                AttackTargetSelect();
                 _enemies.Remove(enemy);
+
+                if (_enemies.Count < 1)
+                    _isEnemyInRadius = false;
             }
         }
 
@@ -133,31 +140,43 @@ namespace Game
 
         private void AttackEnable()
         {
+            Debug.Log("Enable");
             OnAttack?.Invoke(true);
         }
 
         private void AttackDisable()
         {
+            Debug.Log("Disable");
             OnAttack?.Invoke(false);
         }
 
         private void ChoosePatrol()
         {
-            if (_currentBehavior != null)
-                StopCoroutine(_currentBehavior);
-
-            _currentBehavior = StartCoroutine(Patrolling());
+            Debug.Log("Patrol 1");
+            if (_characterState == CharacterState.Attack)
+            {
+                if (_currentBehavior != null)
+                    StopCoroutine(_currentBehavior);
+                Debug.Log("Patrol 2");
+                _characterState = CharacterState.Patrolling;
+                _nextPointIndex = (_nextPointIndex + 1) % _waypoints.Length;
+                _currentBehavior = StartCoroutine(Patrolling());
+            }
         }
 
         private void ChooseAttack()
         {
-            if (_currentBehavior != null)
-                StopCoroutine(_currentBehavior);
+            if (_characterState == CharacterState.Patrolling)
+            {
+                if (_currentBehavior != null)
+                    StopCoroutine(_currentBehavior);
 
-            _currentBehavior = StartCoroutine(Attack());
+                _characterState = CharacterState.Attack;
+                _currentBehavior = StartCoroutine(Attack());
+            }
         }
 
-        private void AttackTargetSelect()
+        private void AttackTargetSelect()               // Переделать в расчет расстояния до врага
         {
             if (_enemies.Count > 0)
             {
@@ -219,23 +238,70 @@ namespace Game
                         onMoveUpdate += Movement;
                     }
                 }
+
+                float distanceToTarget = Vector2.Distance(transform.position, _targetPoint);
+
+                if (distanceToTarget < _minDistance)
+                {
+                    AttackEnable();
+                }
                 else
                 {
-                    float distanceToTarget = Vector2.Distance(transform.position, _targetPoint);
-
-                    if (_enemies.Count > 0 && distanceToTarget < _minDistance)
-                    {
-                        AttackEnable();
-                    }
-                    else
-                    {
-                        _isEnemyFound = false;
-                        ChoosePatrol();
-                    }
+                    AttackDisable();
                 }
 
                 yield return new WaitForSeconds(_delayWithAttack);
             }
+        }
+
+        private IEnumerator StateSelection()
+        {
+            float seconds = 1f;
+            var delay = new WaitForSeconds(seconds);
+            float aggressionRadius = GetComponentInChildren<CircleCollider2D>().radius;
+            Debug.Log("Selection");
+
+            while (_isEnemyInRadius)
+            {
+                for (int i = 0; i < _enemies.Count; i++)
+                {
+                    var hit = Physics2D.Raycast(transform.position, (_enemies[i].transform.position - transform.position).normalized, aggressionRadius, _layerObstacle);
+
+                    if (hit)
+                        _isEnemyVisible = (_layerEnemys.value & (1 << hit.collider.gameObject.layer)) > 0;
+
+                    //if (_isEnemyVisible)
+                    //    break;
+
+                    if (_isEnemyVisible && _characterState == CharacterState.Patrolling)
+                    {
+                        _targetPoint = hit.transform.position;
+                        ChooseAttack();                                // Удалить принимаемое значение?
+                        break;
+                    }
+                }
+
+                /*                if (_isEnemyVisible && _characterState == CharacterState.Patrolling)
+                                {
+                                    ChooseAttack();
+                                }
+                                else*/
+                if (_isEnemyVisible == false && _characterState == CharacterState.Attack)
+                {
+                    ChoosePatrol();
+                }
+
+                yield return delay;
+            }
+
+            ChoosePatrol();
+            _stateSelection = null;
+        }
+
+        private enum CharacterState
+        {
+            Patrolling,
+            Attack,
         }
     }
 }
