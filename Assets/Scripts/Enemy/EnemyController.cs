@@ -76,8 +76,6 @@ namespace Game
                 {
                     _isEnemyInRadius = true;
 
-                    //if (_stateSelection == null)
-                    //    _stateSelection = StartCoroutine(StateSelection());
                     if (_stateSelection != null)
                         StopCoroutine(_stateSelection);
 
@@ -242,13 +240,9 @@ namespace Game
                 float distanceToTarget = Vector2.Distance(transform.position, _targetPoint);
 
                 if (distanceToTarget < _minDistance)
-                {
                     AttackEnable();
-                }
                 else
-                {
                     AttackDisable();
-                }
 
                 yield return delay;
             }
@@ -259,12 +253,12 @@ namespace Game
             float seconds = 1f;
             var delay = new WaitForSeconds(seconds);
             float aggressionRadius = GetComponentInChildren<CircleCollider2D>().radius;
-            Debug.Log("Selection");
 
             while (_isEnemyInRadius)
             {
                 for (int i = 0; i < _enemies.Count; i++)
                 {
+                    _isEnemyVisible = false;
                     var hit = Physics2D.Raycast(transform.position, (_enemies[i].transform.position - transform.position).normalized, aggressionRadius, _layerObstacle);
 
                     if (hit)
@@ -279,9 +273,7 @@ namespace Game
                 }
 
                 if (_isEnemyVisible == false && _characterState == CharacterState.Attack)
-                {
                     ChoosePatrol();
-                }
 
                 yield return delay;
             }
