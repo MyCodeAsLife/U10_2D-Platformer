@@ -27,7 +27,6 @@ namespace Game
         private float _moveSpeed;
         private float _minDistance;
         private float _newPosX;
-        private float _delayWithAttack;
         private float _distanceToTargetX;
 
         public event Action<bool> OnRunning;
@@ -62,7 +61,6 @@ namespace Game
             _isEnemyVisible = false;
             _minDistance = 1.2f;
             _moveSpeed = 3f;
-            _delayWithAttack = 0.5f;
         }
 
         private void OnTriggerEnter2D(Collider2D collision)
@@ -78,8 +76,12 @@ namespace Game
                 {
                     _isEnemyInRadius = true;
 
-                    if (_stateSelection == null)
-                        _stateSelection = StartCoroutine(StateSelection());
+                    //if (_stateSelection == null)
+                    //    _stateSelection = StartCoroutine(StateSelection());
+                    if (_stateSelection != null)
+                        StopCoroutine(_stateSelection);
+
+                    _stateSelection = StartCoroutine(StateSelection());
                 }
             }
         }
@@ -140,31 +142,28 @@ namespace Game
 
         private void AttackEnable()
         {
-            Debug.Log("Enable");
             OnAttack?.Invoke(true);
         }
 
         private void AttackDisable()
         {
-            Debug.Log("Disable");
             OnAttack?.Invoke(false);
         }
 
         private void ChoosePatrol()
         {
-            Debug.Log("Patrol 1");
             if (_characterState == CharacterState.Attack)
             {
                 if (_currentBehavior != null)
                     StopCoroutine(_currentBehavior);
-                Debug.Log("Patrol 2");
+
+                AttackDisable();
                 _characterState = CharacterState.Patrolling;
-                _nextPointIndex = (_nextPointIndex + 1) % _waypoints.Length;
                 _currentBehavior = StartCoroutine(Patrolling());
             }
         }
 
-        private void ChooseAttack()
+        private void ChooseAggression()
         {
             if (_characterState == CharacterState.Patrolling)
             {
@@ -172,11 +171,11 @@ namespace Game
                     StopCoroutine(_currentBehavior);
 
                 _characterState = CharacterState.Attack;
-                _currentBehavior = StartCoroutine(Attack());
+                _currentBehavior = StartCoroutine(Aggression());
             }
         }
 
-        private void AttackTargetSelect()               // Переделать в расчет расстояния до врага
+        private void AttackTargetSelect()
         {
             if (_enemies.Count > 0)
             {
@@ -199,7 +198,7 @@ namespace Game
 
         private IEnumerator Patrolling()
         {
-            const float Second = 3.5f;
+            const float Second = 2f;
             bool isPatriling = true;
             var wait = new WaitForSeconds(Second);
 
@@ -219,9 +218,10 @@ namespace Game
             }
         }
 
-        private IEnumerator Attack()
+        private IEnumerator Aggression()
         {
-            yield return new WaitForSeconds(_delayWithAttack);
+            float reactionDelay = 0.3f;
+            var delay = new WaitForSeconds(reactionDelay);
 
             while (true)
             {
@@ -250,7 +250,7 @@ namespace Game
                     AttackDisable();
                 }
 
-                yield return new WaitForSeconds(_delayWithAttack);
+                yield return delay;
             }
         }
 
@@ -270,22 +270,14 @@ namespace Game
                     if (hit)
                         _isEnemyVisible = (_layerEnemys.value & (1 << hit.collider.gameObject.layer)) > 0;
 
-                    //if (_isEnemyVisible)
-                    //    break;
-
                     if (_isEnemyVisible && _characterState == CharacterState.Patrolling)
                     {
                         _targetPoint = hit.transform.position;
-                        ChooseAttack();                                // Удалить принимаемое значение?
+                        ChooseAggression();
                         break;
                     }
                 }
 
-                /*                if (_isEnemyVisible && _characterState == CharacterState.Patrolling)
-                                {
-                                    ChooseAttack();
-                                }
-                                else*/
                 if (_isEnemyVisible == false && _characterState == CharacterState.Attack)
                 {
                     ChoosePatrol();

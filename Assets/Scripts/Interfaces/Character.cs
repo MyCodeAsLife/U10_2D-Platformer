@@ -10,6 +10,7 @@ namespace Game
 
         private Slash _slash;
         private Health _health = new Health();
+        private Coroutine _attack;
 
         private float _physicalResistance;
         private float _armor;
@@ -68,8 +69,18 @@ namespace Game
         {
             _isAttackAttempt = isAttackAttempt;
 
-            if (_isAttackAttempt)
-                StartCoroutine(Slash());
+            if (_isAttackAttempt && _attack == null)
+            {
+                _slash.OnHit += SetDamage;
+                _attack = StartCoroutine(Attack());
+            }
+            else if (_attack != null)
+            {
+                StopCoroutine(_attack);
+                _slash.OnHit -= SetDamage;
+                _canAttack = true;
+                _attack = null;
+            }
         }
 
         public void ChangeDirection(bool flipX)
@@ -77,10 +88,9 @@ namespace Game
             _flipX = flipX;
         }
 
-        private IEnumerator Slash()
+        private IEnumerator Attack()
         {
             WaitForSeconds _delay = new WaitForSeconds(_attackSpeed);
-            _slash.OnHit += Attack;
 
             while (_isAttackAttempt && _canAttack)
             {
@@ -98,10 +108,10 @@ namespace Game
                 _canAttack = true;
             }
 
-            _slash.OnHit -= Attack;
+            _attack = null;
         }
 
-        private void Attack(IDamageble enemy)
+        private void SetDamage(IDamageble enemy)
         {
             enemy.TakeDamage(_damage);
         }
