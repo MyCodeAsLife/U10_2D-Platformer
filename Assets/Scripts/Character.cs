@@ -10,7 +10,7 @@ namespace Game
 
         private Slash _slash;
         private Health _health = new Health();
-        private Coroutine _attack;
+        private Coroutine _strike;
 
         private float _physicalResistance;
         private float _armor;
@@ -21,6 +21,9 @@ namespace Game
         private bool _flipX;
         private bool _isAttackAttempt;
         private bool _canAttack;
+
+        public float MaxHealtValue { get { return _health.MaxValue; } }
+        public float HealthValue { get { return _health.Value; } }
 
         private void Start()
         {
@@ -39,9 +42,6 @@ namespace Game
         {
             StopAllCoroutines();
         }
-
-        public float MaxHealtValue { get { return _health.MaxValue; } }
-        public float HealthValue { get { return _health.Value; } }
 
         public void HealChangeSubscribe(Action<float> function)
         {
@@ -69,17 +69,17 @@ namespace Game
         {
             _isAttackAttempt = isAttackAttempt;
 
-            if (_isAttackAttempt && _attack == null)
+            if (_isAttackAttempt && _strike == null)
             {
-                _slash.OnHit += SetDamage;
-                _attack = StartCoroutine(Attack());
+                _slash.OnHit += Attack;
+                _strike = StartCoroutine(Strike());
             }
-            else if (_attack != null)
+            else if (_strike != null)
             {
-                StopCoroutine(_attack);
-                _slash.OnHit -= SetDamage;
+                StopCoroutine(_strike);
+                _slash.OnHit -= Attack;
                 _canAttack = true;
-                _attack = null;
+                _strike = null;
             }
         }
 
@@ -88,7 +88,17 @@ namespace Game
             _flipX = flipX;
         }
 
-        private IEnumerator Attack()
+        private void Attack(IDamageble enemy)
+        {
+            enemy.TakeDamage(_damage);
+        }
+
+        private void DisableSlash()
+        {
+            _slash.gameObject.SetActive(false);
+        }
+
+        private IEnumerator Strike()
         {
             WaitForSeconds _delay = new WaitForSeconds(_attackSpeed);
 
@@ -108,17 +118,7 @@ namespace Game
                 _canAttack = true;
             }
 
-            _attack = null;
-        }
-
-        private void SetDamage(IDamageble enemy)
-        {
-            enemy.TakeDamage(_damage);
-        }
-
-        private void DisableSlash()
-        {
-            _slash.gameObject.SetActive(false);
+            _strike = null;
         }
     }
 }

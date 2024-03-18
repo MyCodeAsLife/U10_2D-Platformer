@@ -7420,6 +7420,7 @@ GameObject:
   - component: {fileID: 1672771934}
   - component: {fileID: 1672771935}
   - component: {fileID: 1672771931}
+  - component: {fileID: 1672771939}
   - component: {fileID: 1672771930}
   - component: {fileID: 1672771938}
   - component: {fileID: 1672771937}
@@ -7442,13 +7443,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 27ad86c6216733344a046e5a9f6a30c5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _layerObstacle:
-    serializedVersion: 2
-    m_Bits: 72
-  _layerEnemys:
-    serializedVersion: 2
-    m_Bits: 8
-  _route: {fileID: 1500030660}
 --- !u!50 &1672771931
 Rigidbody2D:
   serializedVersion: 4
@@ -7569,6 +7563,25 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _slashPrefab: {fileID: 1846076139198150756, guid: 81c9b1592573a194b82e25cea6a2ebbe, type: 3}
+--- !u!114 &1672771939
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1672771929}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9724b63e1b515ef4492f7517bc094bb9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _layerObstacle:
+    serializedVersion: 2
+    m_Bits: 72
+  _layerEnemys:
+    serializedVersion: 2
+    m_Bits: 8
+  _route: {fileID: 1500030660}
 --- !u!1 &1751881640
 GameObject:
   m_ObjectHideFlags: 0
