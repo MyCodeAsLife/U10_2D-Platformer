@@ -139,11 +139,9 @@ namespace Game
                 if (_enemyController.DistanceToTargetX <= _enemyController.MinDistance)
                 {
                     yield return wait;
-
                     _nextPointIndex = (_nextPointIndex + 1) % _waypoints.Length;
                     _enemyController.TargetPoint = _waypoints[_nextPointIndex].position;
-
-                    _enemyController.MovementEnable();
+                    _enemyController.SwitchMovement(true);
                 }
 
                 yield return null;
@@ -163,10 +161,9 @@ namespace Game
 
                 if (_enemyController.DistanceToTargetX > _enemyController.MinDistance)
                     if (_enemyController.IsMove == false)
-                        _enemyController.MovementEnable();
+                        _enemyController.SwitchMovement(true);
 
                 _enemyController.ChangeAttackState(distanceToTarget < _attackRange);
-
                 yield return delay;
             }
         }

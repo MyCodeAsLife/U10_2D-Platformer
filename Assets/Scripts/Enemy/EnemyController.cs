@@ -24,7 +24,7 @@ namespace Game
 
         private void OnEnable()
         {
-            MovementEnable();
+            SwitchMovement(true);
         }
 
         private void OnDisable()
@@ -49,22 +49,14 @@ namespace Game
             OnAttack?.Invoke(isAttack);
         }
 
-        public void MovementEnable()
+        public void SwitchMovement(bool isMove)
         {
-            if (_isMove == false)
-            {
-                _isMove = true;
-                onMoveUpdate += Movement;
-            }
-        }
+            _isMove = isMove;
 
-        public void MovementDisable()
-        {
-            if (_isMove == true)
-            {
-                _isMove = false;
+            if (_isMove)
+                onMoveUpdate += Movement;
+            else
                 onMoveUpdate -= Movement;
-            }
         }
 
         public void MoveCalculate()
@@ -93,16 +85,11 @@ namespace Game
             Rotate();
 
             if (_distanceToTargetX <= _minDistance)
-            {
-                _isMove = false;
-                OnRunning?.Invoke(_isMove);
-                onMoveUpdate -= Movement;
-            }
+                SwitchMovement(false);
             else
-            {
                 Move();
-                OnRunning?.Invoke(_isMove);
-            }
+
+            OnRunning?.Invoke(_isMove);
         }
     }
 }
