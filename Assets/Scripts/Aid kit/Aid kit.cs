@@ -14,7 +14,7 @@ namespace Game
             if (collision.TryGetComponent<Character>(out Character character))
             {
                 OnPickup?.Invoke();
-                character.Healing(_healtPoints);
+                character.TakeHealing(_healtPoints);
             }
         }
     }

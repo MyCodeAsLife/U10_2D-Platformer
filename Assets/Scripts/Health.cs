@@ -4,49 +4,74 @@ namespace Game
 {
     public class Health
     {
-        private float _health;
-        private float _maxHealth;
+        private float _currentHealthPoint;
+        private float _maxHealthPoint;
 
         public event Action<float> HealthChanged;
+        public event Action<float> MaxHealthChanged;
 
         public Health()
         {
-            _maxHealth = 100;
-            _health = _maxHealth;
+            _currentHealthPoint = 100;
+            _maxHealthPoint = 100;
         }
 
-        public Health(float maxHealth)
+        public Health(float healthPoint)
         {
-            _maxHealth = maxHealth;
-            _health = _maxHealth;
+            _currentHealthPoint = healthPoint;
+            _maxHealthPoint = healthPoint;
         }
 
-        public float Value { get { return _health; } }
-        public float MaxValue { get { return _maxHealth; } }
-
-        public void Increase(float points)
+        public Health(float currentHealthPoint, float maxHealthPoint)
         {
-            if (points > 0 && _health < _maxHealth)
+            _maxHealthPoint = maxHealthPoint;
+
+            if (currentHealthPoint < maxHealthPoint && currentHealthPoint > 0)
+                _currentHealthPoint = currentHealthPoint;
+            else
+                _currentHealthPoint = maxHealthPoint;
+        }
+
+        public float Value { get { return _currentHealthPoint; } }
+        public float MaxValue { get { return _maxHealthPoint; } }
+
+        public void Increase(float healthPoint)
+        {
+            if (healthPoint > 0)
             {
-                _health += points;
+                _currentHealthPoint += healthPoint;
 
-                if (_health > _maxHealth)
-                    _health = _maxHealth;
+                if (_currentHealthPoint > _maxHealthPoint)
+                    _currentHealthPoint = _maxHealthPoint;
 
-                HealthChanged?.Invoke(_health);
+                HealthChanged?.Invoke(_currentHealthPoint);
             }
         }
 
-        public void Decrease(float points)
+        public void Decrease(float healthPoint)
         {
-            if (points > 0)
+            if (healthPoint > 0)
             {
-                _health -= points;
+                _currentHealthPoint -= healthPoint;
 
-                if (_health < 0)
-                    _health = 0;
+                if (_currentHealthPoint <= 0)
+                    _currentHealthPoint = 0;
 
-                HealthChanged?.Invoke(_health);
+                HealthChanged?.Invoke(_currentHealthPoint);
+            }
+        }
+
+        public void ChangeMaxHP(float maxHealthPoint)
+        {
+            if (maxHealthPoint > 0)
+            {
+                _maxHealthPoint = maxHealthPoint;
+
+                if (_currentHealthPoint > _maxHealthPoint)
+                    _currentHealthPoint = _maxHealthPoint;
+
+                HealthChanged?.Invoke(_currentHealthPoint);
+                MaxHealthChanged?.Invoke(_maxHealthPoint);
             }
         }
     }

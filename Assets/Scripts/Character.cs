@@ -4,12 +4,12 @@ using UnityEngine;
 
 namespace Game
 {
-    public class Character : MonoBehaviour, IDamageble
+    public class Character : MonoBehaviour, IDamageble, IHealable
     {
         [SerializeField] private Slash _slashPrefab;
 
         private Slash _slash;
-        private Health _health = new Health();
+        private Health _health = new Health();                      // Çהוסü
         private Coroutine _strike;
 
         private float _physicalResistance;
@@ -22,8 +22,13 @@ namespace Game
         private bool _isAttackAttempt;
         private bool _canAttack;
 
-        public float MaxHealtValue { get { return _health.MaxValue; } }
-        public float HealthValue { get { return _health.Value; } }
+        public float Health { get { return _health.Value; } }
+        public float MaxHealth { get { return _health.MaxValue; } }
+
+        private void Awake()                                    // Çהוסü
+        {
+            //_health = new Health(100);
+        }
 
         private void Start()
         {
@@ -43,14 +48,24 @@ namespace Game
             StopAllCoroutines();
         }
 
-        public void HealChangeSubscribe(Action<float> function)
+        public void SubscribeHeathChanged(Action<float> function)
         {
             _health.HealthChanged += function;
         }
 
-        public void HealChangeUnsubscribe(Action<float> function)
+        public void SubscribeMaxHeathChanged(Action<float> function)
+        {
+            _health.MaxHealthChanged += function;
+        }
+
+        public void UnsubscribeHeathChanged(Action<float> function)
         {
             _health.HealthChanged -= function;
+        }
+
+        public void UnsubscribeMaxHeathChanged(Action<float> function)
+        {
+            _health.MaxHealthChanged -= function;
         }
 
         public void TakeDamage(float damage)
@@ -60,7 +75,7 @@ namespace Game
             _health.Decrease(damage);
         }
 
-        public void Healing(float healthPoints)
+        public void TakeHealing(float healthPoints)
         {
             _health.Increase(healthPoints);
         }
