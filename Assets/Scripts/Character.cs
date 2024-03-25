@@ -6,11 +6,14 @@ namespace Game
 {
     public class Character : MonoBehaviour, IDamageble, IHealable
     {
-        [SerializeField] private Slash _slashPrefab;
+        [SerializeField] private ISkill _slashPrefab;
 
-        private Slash _slash;
-        private Health _health = new Health();                      // Çהוסü
+        private ISkill _slash;
+        //private Vampirism _vampirism;
+        private Health _health;
+
         private Coroutine _strike;
+        //private Coroutine _pumpOver;
 
         private float _physicalResistance;
         private float _armor;
@@ -22,12 +25,13 @@ namespace Game
         private bool _isAttackAttempt;
         private bool _canAttack;
 
-        public float Health { get { return _health.Value; } }
+        public float CurrentHealth { get { return _health.Value; } }
+        public float PrecentCurrentHealth { get { return _health.PercentValue; } }
         public float MaxHealth { get { return _health.MaxValue; } }
 
-        private void Awake()                                    // Çהוסü
+        protected virtual void Awake()
         {
-            //_health = new Health(100);
+            _health = new Health(100);
         }
 
         private void Start()
@@ -50,22 +54,12 @@ namespace Game
 
         public void SubscribeHeathChanged(Action<float> function)
         {
-            _health.HealthChanged += function;
-        }
-
-        public void SubscribeMaxHeathChanged(Action<float> function)
-        {
-            _health.MaxHealthChanged += function;
+            _health.OnChange += function;
         }
 
         public void UnsubscribeHeathChanged(Action<float> function)
         {
-            _health.HealthChanged -= function;
-        }
-
-        public void UnsubscribeMaxHeathChanged(Action<float> function)
-        {
-            _health.MaxHealthChanged -= function;
+            _health.OnChange -= function;
         }
 
         public void TakeDamage(float damage)

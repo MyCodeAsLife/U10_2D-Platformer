@@ -29,6 +29,7 @@ namespace Game
         public event Action<bool> OnRunning;
         public event Action<bool> OnDirection;
         public event Action<bool> OnAttack;
+        public event Action<bool> OnVampirism;
         private event Action MoveUpdate;
 
         private void Awake()
@@ -189,6 +190,16 @@ namespace Game
         private void AttackDisable(InputAction.CallbackContext obj)
         {
             OnAttack?.Invoke(false);
+        }
+
+        private void VampirismEnable(InputAction.CallbackContext obj)
+        {
+            OnVampirism?.Invoke(true);
+        }
+
+        private void VampirismDisable(InputAction.CallbackContext obj)
+        {
+            OnVampirism?.Invoke(false);
         }
 
         private IEnumerator UnlockJump()

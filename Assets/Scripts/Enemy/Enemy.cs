@@ -7,8 +7,9 @@ namespace Game
     {
         private EnemyController _controller;
 
-        private void Awake()
+        protected override void Awake()
         {
+            base.Awake();
             _controller = GetComponent<EnemyController>();
         }
 

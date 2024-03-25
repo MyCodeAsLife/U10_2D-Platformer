@@ -14,34 +14,25 @@ namespace Game
         private void OnDisable()
         {
             _character.UnsubscribeHeathChanged(ChangeHealth);
-            _character.UnsubscribeMaxHeathChanged(ChangeMaxHealth);
         }
 
-        private void Start()                                                // Çהוסü
+        private void Start()
         {
             _character.SubscribeHeathChanged(ChangeHealth);
-            _character.SubscribeMaxHeathChanged(ChangeMaxHealth);
-
-            ChangeMaxHealth(_character.MaxHealth);
-            ChangeHealth(_character.Health);
+            ChangeHealth(_character.PrecentCurrentHealth);
         }
 
-        private void ChangeHealth(float healthPoint)
+        private void ChangeHealth(float percentHealth)
         {
             if (_changesSmoothly != null)
                 StopCoroutine(_changesSmoothly);
 
-            _changesSmoothly = StartCoroutine(ChangesSmoothly(healthPoint));
-        }
-
-        private void ChangeMaxHealth(float maxHealthPoint)
-        {
-            _healthBar.maxValue = maxHealthPoint;
+            _changesSmoothly = StartCoroutine(ChangesSmoothly(percentHealth));
         }
 
         private IEnumerator ChangesSmoothly(float healthPoint)
         {
-            float speed = 50;
+            float speed = 0.7f;
 
             while (_healthBar.value != healthPoint)
             {

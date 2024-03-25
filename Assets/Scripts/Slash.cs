@@ -4,13 +4,13 @@ using UnityEngine;
 
 namespace Game
 {
-    public class Slash : MonoBehaviour
+    public class Slash : ISkill
     {
         [SerializeField] private ContactFilter2D _contactFilter;
 
         private Vector2 _affectedArea = new Vector2(2, 2);
 
-        public event Action<IDamageble> OnHit;
+        public override event Action<IDamageble> OnHit;
 
         private void OnEnable()
         {

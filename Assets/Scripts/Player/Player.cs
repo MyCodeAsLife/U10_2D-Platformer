@@ -1,3 +1,4 @@
+using UnityEditor.SceneManagement;
 using UnityEngine;
 
 namespace Game
@@ -6,10 +7,17 @@ namespace Game
     public class Player : Character
     {
         private PlayerController _controller;
+        private Vampirism _vampirism;
+        private Coroutine _pumpOver;
 
-        private void Awake()
+        protected override void Awake()
         {
+            base.Awake();
             _controller = GetComponent<PlayerController>();
+            _vampirism = this.gameObject.AddComponent<Vampirism>();
+            //GetComponent<Vampirism>();
+            //_vampirism = new Vampirism();
+
         }
 
         private void OnEnable()

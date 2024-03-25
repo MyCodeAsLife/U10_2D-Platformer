@@ -71,6 +71,15 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Vampirism"",
+                    ""type"": ""Button"",
+                    ""id"": ""c7e55317-f000-4475-bc14-93a143217979"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -282,6 +291,17 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
                     ""action"": ""Attack"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""a3ef9083-a112-449f-b670-048240e37436"",
+                    ""path"": ""<Mouse>/rightButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""KeyboardAndMouse"",
+                    ""action"": ""Vampirism"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -312,6 +332,7 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
         m_Movement_MoveHorizontal = m_Movement.FindAction("MoveHorizontal", throwIfNotFound: true);
         m_Movement_MoveVertical = m_Movement.FindAction("MoveVertical", throwIfNotFound: true);
         m_Movement_Attack = m_Movement.FindAction("Attack", throwIfNotFound: true);
+        m_Movement_Vampirism = m_Movement.FindAction("Vampirism", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -378,6 +399,7 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
     private readonly InputAction m_Movement_MoveHorizontal;
     private readonly InputAction m_Movement_MoveVertical;
     private readonly InputAction m_Movement_Attack;
+    private readonly InputAction m_Movement_Vampirism;
     public struct MovementActions
     {
         private @PlayerInputActions m_Wrapper;
@@ -387,6 +409,7 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
         public InputAction @MoveHorizontal => m_Wrapper.m_Movement_MoveHorizontal;
         public InputAction @MoveVertical => m_Wrapper.m_Movement_MoveVertical;
         public InputAction @Attack => m_Wrapper.m_Movement_Attack;
+        public InputAction @Vampirism => m_Wrapper.m_Movement_Vampirism;
         public InputActionMap Get() { return m_Wrapper.m_Movement; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -411,6 +434,9 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
             @Attack.started += instance.OnAttack;
             @Attack.performed += instance.OnAttack;
             @Attack.canceled += instance.OnAttack;
+            @Vampirism.started += instance.OnVampirism;
+            @Vampirism.performed += instance.OnVampirism;
+            @Vampirism.canceled += instance.OnVampirism;
         }
 
         private void UnregisterCallbacks(IMovementActions instance)
@@ -430,6 +456,9 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
             @Attack.started -= instance.OnAttack;
             @Attack.performed -= instance.OnAttack;
             @Attack.canceled -= instance.OnAttack;
+            @Vampirism.started -= instance.OnVampirism;
+            @Vampirism.performed -= instance.OnVampirism;
+            @Vampirism.canceled -= instance.OnVampirism;
         }
 
         public void RemoveCallbacks(IMovementActions instance)
@@ -463,5 +492,6 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
         void OnMoveHorizontal(InputAction.CallbackContext context);
         void OnMoveVertical(InputAction.CallbackContext context);
         void OnAttack(InputAction.CallbackContext context);
+        void OnVampirism(InputAction.CallbackContext context);
     }
 }
