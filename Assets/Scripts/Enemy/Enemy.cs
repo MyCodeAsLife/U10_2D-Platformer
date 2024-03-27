@@ -15,14 +15,14 @@ namespace Game
 
         private void OnEnable()
         {
-            _controller.OnAttack += ChangeAttackState;
-            _controller.OnDirection += ChangeDirection;
+            _controller.PROPERTY_SKILL_USED.OnChanged += BattleSystem.ChangeSkillUsed;
+            _controller.PROPERTY_DIRECTION.OnChanged += BattleSystem.ChangeDirection;
         }
 
         private void OnDisable()
         {
-            _controller.OnAttack -= ChangeAttackState;
-            _controller.OnDirection -= ChangeDirection;
+            _controller.PROPERTY_SKILL_USED.OnChanged -= BattleSystem.ChangeSkillUsed;
+            _controller.PROPERTY_DIRECTION.OnChanged -= BattleSystem.ChangeDirection;
         }
     }
 }

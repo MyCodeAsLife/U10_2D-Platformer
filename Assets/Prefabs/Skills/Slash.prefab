@@ -414,7 +414,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e5d7ebf2bff34864191578c547710917, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _contactFilter:
+  ContactFilter:
     useTriggers: 0
     useLayerMask: 1
     useDepth: 0

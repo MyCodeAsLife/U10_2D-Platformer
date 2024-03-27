@@ -160,7 +160,7 @@ namespace Game
                 float distanceToTarget = Vector2.Distance(transform.position, _enemyController.TargetPoint);
 
                 if (_enemyController.DistanceToTargetX > _enemyController.MinDistance)
-                    if (_enemyController.IsMove == false)
+                    if (_enemyController.PROPERTY_RUNNING.Value == false)
                         _enemyController.SwitchMovement(true);
 
                 _enemyController.ChangeAttackState(distanceToTarget < _attackRange);

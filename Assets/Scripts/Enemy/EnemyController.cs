@@ -5,20 +5,18 @@ namespace Game
 {
     public class EnemyController : MonoBehaviour
     {
-        private bool _isMove;
+        public readonly SingleReactiveProperty<bool> PROPERTY_RUNNING = new();
+        public readonly SingleReactiveProperty<bool> PROPERTY_DIRECTION = new();
+        public readonly DoubleReactiveProperty<bool, Skill> PROPERTY_SKILL_USED = new();
 
         private float _moveSpeed;
         private float _minDistance;
         private float _newPosX;
         private float _distanceToTargetX;
 
-        public event Action<bool> OnRunning;
-        public event Action<bool> OnDirection;
-        public event Action<bool> OnAttack;
         public event Action onMoveUpdate;
 
         public Vector3 TargetPoint { get; set; }
-        public bool IsMove { get { return _isMove; } }
         public float MinDistance { get { return _minDistance; } }
         public float DistanceToTargetX { get { return _distanceToTargetX; } }
 
@@ -46,14 +44,14 @@ namespace Game
 
         public void ChangeAttackState(bool isAttack)
         {
-            OnAttack?.Invoke(isAttack);
+            PROPERTY_SKILL_USED.SetValues(isAttack, Skill.Slash);
         }
 
         public void SwitchMovement(bool isMove)
         {
-            _isMove = isMove;
+            PROPERTY_RUNNING.Value = isMove;
 
-            if (_isMove)
+            if (PROPERTY_RUNNING.Value)
                 onMoveUpdate += Movement;
             else
                 onMoveUpdate -= Movement;
@@ -75,8 +73,7 @@ namespace Game
 
         private void Rotate()
         {
-            bool _isRight = (_newPosX - transform.position.x > 0);
-            OnDirection?.Invoke(_isRight);
+            PROPERTY_DIRECTION.Value = _newPosX - transform.position.x > 0;
         }
 
         private void Movement()
@@ -88,8 +85,6 @@ namespace Game
                 SwitchMovement(false);
             else
                 Move();
-
-            OnRunning?.Invoke(_isMove);
         }
     }
 }

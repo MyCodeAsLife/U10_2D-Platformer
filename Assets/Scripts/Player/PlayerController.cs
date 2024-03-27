@@ -8,6 +8,11 @@ namespace Game
     [RequireComponent(typeof(Rigidbody2D))]
     public class PlayerController : MonoBehaviour
     {
+        public readonly SingleReactiveProperty<bool> PROPERTY_GROUNDED = new();
+        public readonly SingleReactiveProperty<bool> PROPERTY_RUNNING = new();
+        public readonly SingleReactiveProperty<bool> PROPERTY_DIRECTION = new();
+        public readonly DoubleReactiveProperty<bool, Skill> PROPERTY_SKILL_USED = new();
+
         [SerializeField] private LayerMask _layerObstacle;
         [SerializeField] private Transform _groundChecker;
         [SerializeField] private float _moveSpeed;
@@ -18,24 +23,16 @@ namespace Game
         private CapsuleCollider2D _groundCheckCollider;
 
         private Vector2 _InputVector;
-        private bool _onMoveHorizontal;
         private bool _onMoveVertical;
         private bool _onJump;
         private bool _isBlocksJump;
-        private bool _isGrounded;
-        private bool _flipX;
 
-        public event Action<bool> OnGrounded;
-        public event Action<bool> OnRunning;
-        public event Action<bool> OnDirection;
-        public event Action<bool> OnAttack;
-        public event Action<bool> OnVampirism;
-        private event Action MoveUpdate;
+        public event Action MoveUpdate;
 
         private void Awake()
         {
             _onMoveVertical = false;
-            _onMoveHorizontal = false;
+            PROPERTY_RUNNING.Value = false;
             _onJump = false;
             _isBlocksJump = false;
             _layerObstacle = 64;
@@ -58,6 +55,8 @@ namespace Game
             _playerInputActions.Movement.MoveVertical.canceled += MoveVerticalDisable;
             _playerInputActions.Movement.Attack.performed += AttackEnable;
             _playerInputActions.Movement.Attack.canceled += AttackDisable;
+            _playerInputActions.Movement.Vampirism.performed += VampirismEnable;
+            _playerInputActions.Movement.Vampirism.canceled += VampirismDisable;
         }
 
         private void OnDisable()
@@ -70,6 +69,8 @@ namespace Game
             _playerInputActions.Movement.MoveVertical.canceled -= MoveVerticalDisable;
             _playerInputActions.Movement.Attack.performed -= AttackEnable;
             _playerInputActions.Movement.Attack.canceled -= AttackDisable;
+            _playerInputActions.Movement.Vampirism.performed -= VampirismEnable;
+            _playerInputActions.Movement.Vampirism.canceled -= VampirismDisable;
             _playerInputActions.Disable();
 
             StopAllCoroutines();
@@ -89,17 +90,12 @@ namespace Game
             MoveHorizontalCalculate();
 
             if (_InputVector.x < 0)
-                _flipX = true;
+                PROPERTY_DIRECTION.Value = true;
             else if (_InputVector.x > 0)
-                _flipX = false;
+                PROPERTY_DIRECTION.Value = false;
 
-            OnDirection?.Invoke(_flipX);
-
-            if (_onMoveHorizontal == false)
-            {
-                _onMoveHorizontal = true;
+            if (PROPERTY_RUNNING.Value == false)
                 MoveUpdate += MoveHorizontal;
-            }
         }
 
         private void MoveVerticalEnable(InputAction.CallbackContext obj)
@@ -115,10 +111,8 @@ namespace Game
 
         private void MoveHorizontalDisable(InputAction.CallbackContext obj)
         {
-            _onMoveHorizontal = false;
+            PROPERTY_RUNNING.Value = false;
             MoveUpdate -= MoveHorizontal;
-
-            OnRunning?.Invoke(_onMoveHorizontal);
         }
 
         private void MoveVerticalDisable(InputAction.CallbackContext obj)
@@ -129,9 +123,7 @@ namespace Game
 
         private void GroundCheck()
         {
-            _isGrounded = Physics2D.OverlapCapsule(_groundChecker.position, _groundCheckCollider.size, CapsuleDirection2D.Horizontal, 0, _layerObstacle);
-
-            OnGrounded?.Invoke(_isGrounded);
+            PROPERTY_GROUNDED.Value = Physics2D.OverlapCapsule(_groundChecker.position, _groundCheckCollider.size, CapsuleDirection2D.Horizontal, 0, _layerObstacle);
         }
 
         private void MoveHorizontalCalculate()
@@ -146,7 +138,7 @@ namespace Game
 
         private void MoveHorizontal()
         {
-            OnRunning?.Invoke((int)_InputVector.x != 0);
+            PROPERTY_RUNNING.Value = (int)_InputVector.x != 0;
             _rigidbody.velocity = new Vector2(_InputVector.x * _moveSpeed * Time.deltaTime, _rigidbody.velocity.y);
         }
 
@@ -172,7 +164,7 @@ namespace Game
 
         private void Jump()
         {
-            if (_isGrounded && _isBlocksJump == false)
+            if (PROPERTY_GROUNDED.Value && _isBlocksJump == false)
             {
                 _rigidbody.velocity = new Vector2(_rigidbody.velocity.x, 0);
                 _rigidbody.AddForce(Vector2.up * _jumpPower);
@@ -184,22 +176,22 @@ namespace Game
 
         private void AttackEnable(InputAction.CallbackContext obj)
         {
-            OnAttack?.Invoke(true);
+            PROPERTY_SKILL_USED.SetValues(true, Skill.Slash);
         }
 
         private void AttackDisable(InputAction.CallbackContext obj)
         {
-            OnAttack?.Invoke(false);
+            PROPERTY_SKILL_USED.SetValues(false, Skill.Slash);
         }
 
         private void VampirismEnable(InputAction.CallbackContext obj)
         {
-            OnVampirism?.Invoke(true);
+            PROPERTY_SKILL_USED.SetValues(true, Skill.Vampirism);
         }
 
         private void VampirismDisable(InputAction.CallbackContext obj)
         {
-            OnVampirism?.Invoke(false);
+            PROPERTY_SKILL_USED.SetValues(false, Skill.Vampirism);
         }
 
         private IEnumerator UnlockJump()

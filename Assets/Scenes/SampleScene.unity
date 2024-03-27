@@ -7869,7 +7869,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7ed249b734425004e986a25dde0898ba, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _slashPrefab: {fileID: 1846076139198150756, guid: 81c9b1592573a194b82e25cea6a2ebbe, type: 3}
+  prefabSkillList:
+  - {fileID: 1846076139198150756, guid: 81c9b1592573a194b82e25cea6a2ebbe, type: 3}
 --- !u!114 &1672771939
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8095,7 +8096,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2296d524a64fb16458879656ed7cafa2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _slashPrefab: {fileID: 5859527785379201996, guid: 75aacad44e50263438068c39a7765b4d, type: 3}
+  prefabSkillList:
+  - {fileID: 5859527785379201996, guid: 75aacad44e50263438068c39a7765b4d, type: 3}
+  - {fileID: 2319380162693779079, guid: af14655ac0401dd42baa26b3314c4783, type: 3}
 --- !u!1 &1911304559
 GameObject:
   m_ObjectHideFlags: 0

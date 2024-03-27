@@ -15,16 +15,16 @@ namespace Game
 
         private void OnEnable()
         {
-            _playerController.OnRunning += SwitchRunning;
-            _playerController.OnGrounded += SwitchGrounded;
-            _playerController.OnDirection += SwitchDirection;
+            _playerController.PROPERTY_RUNNING.OnChanged += SwitchRunning;
+            _playerController.PROPERTY_GROUNDED.OnChanged += SwitchGrounded;
+            _playerController.PROPERTY_DIRECTION.OnChanged += SwitchDirection;
         }
 
         private void OnDisable()
         {
-            _playerController.OnRunning -= SwitchRunning;
-            _playerController.OnGrounded -= SwitchGrounded;
-            _playerController.OnDirection -= SwitchDirection;
+            _playerController.PROPERTY_RUNNING.OnChanged -= SwitchRunning;
+            _playerController.PROPERTY_GROUNDED.OnChanged -= SwitchGrounded;
+            _playerController.PROPERTY_DIRECTION.OnChanged -= SwitchDirection;
         }
     }
 }

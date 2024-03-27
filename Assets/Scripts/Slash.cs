@@ -6,16 +6,20 @@ namespace Game
 {
     public class Slash : ISkill
     {
-        [SerializeField] private ContactFilter2D _contactFilter;
-
-        private Vector2 _affectedArea = new Vector2(2, 2);
-
         public override event Action<IDamageble> OnHit;
+
+        //public override Skill Name { get; private set; }
+
+        public Slash() : base(Skill.Slash)
+        {
+            //Name = Skill.Slash;
+            AffectedArea = 2f;
+        }
 
         private void OnEnable()
         {
             List<Collider2D> hits = new List<Collider2D>();
-            Physics2D.OverlapBox(transform.position, _affectedArea, 0, _contactFilter, hits);
+            Physics2D.OverlapBox(transform.position, new Vector2(AffectedArea, AffectedArea), 0, ContactFilter, hits);
 
             foreach (Collider2D hit in hits)
             {
