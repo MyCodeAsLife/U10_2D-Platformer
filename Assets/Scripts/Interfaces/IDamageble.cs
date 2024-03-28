@@ -1,8 +1,8 @@
 
 namespace Game
 {
-    public interface IDamageble
+    public interface IDamageble : IInteractive
     {
-        public void TakeDamage(float damage);
+        public float TakeDamage(float damage);
     }
 }

@@ -17,7 +17,7 @@ namespace Game
         private Coroutine _currentBehavior;
         private Coroutine _stateSelection;
 
-        private CharacterState _characterState;
+        private CharacterStateEnum _characterState;
         private float _attackRange;
         private int _nextPointIndex;
         private bool _hasEnemyInRadius;
@@ -35,7 +35,7 @@ namespace Game
                 _waypoints[i] = _route.GetChild(i);
 
             _enemyController.TargetPoint = _waypoints[_nextPointIndex].position;
-            _characterState = CharacterState.Patrolling;
+            _characterState = CharacterStateEnum.Patrolling;
             _currentBehavior = StartCoroutine(Patrolling());
         }
 
@@ -84,25 +84,25 @@ namespace Game
 
         private void ChoosePatrol()
         {
-            if (_characterState == CharacterState.Attack)
+            if (_characterState == CharacterStateEnum.Attack)
             {
                 if (_currentBehavior != null)
                     StopCoroutine(_currentBehavior);
 
                 _enemyController.ChangeAttackState(false);
-                _characterState = CharacterState.Patrolling;
+                _characterState = CharacterStateEnum.Patrolling;
                 _currentBehavior = StartCoroutine(Patrolling());
             }
         }
 
         private void ChooseAggression()
         {
-            if (_characterState == CharacterState.Patrolling)
+            if (_characterState == CharacterStateEnum.Patrolling)
             {
                 if (_currentBehavior != null)
                     StopCoroutine(_currentBehavior);
 
-                _characterState = CharacterState.Attack;
+                _characterState = CharacterStateEnum.Attack;
                 _currentBehavior = StartCoroutine(Aggression());
             }
         }
@@ -185,7 +185,7 @@ namespace Game
                     if (hit)
                         isEnemyVisible = (_layerEnemys.value & (1 << hit.collider.gameObject.layer)) > 0;
 
-                    if (isEnemyVisible && _characterState == CharacterState.Patrolling)
+                    if (isEnemyVisible && _characterState == CharacterStateEnum.Patrolling)
                     {
                         _enemyController.TargetPoint = hit.transform.position;
                         ChooseAggression();
@@ -193,7 +193,7 @@ namespace Game
                     }
                 }
 
-                if (isEnemyVisible == false && _characterState == CharacterState.Attack)
+                if (isEnemyVisible == false && _characterState == CharacterStateEnum.Attack)
                     ChoosePatrol();
 
                 yield return delay;

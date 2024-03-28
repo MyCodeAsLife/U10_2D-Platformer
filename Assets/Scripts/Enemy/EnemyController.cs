@@ -7,7 +7,7 @@ namespace Game
     {
         public readonly SingleReactiveProperty<bool> PROPERTY_RUNNING = new();
         public readonly SingleReactiveProperty<bool> PROPERTY_DIRECTION = new();
-        public readonly DoubleReactiveProperty<bool, Skill> PROPERTY_SKILL_USED = new();
+        public readonly DoubleReactiveProperty<bool, SkillEnum> PROPERTY_SKILL_USED = new();
 
         private float _moveSpeed;
         private float _minDistance;
@@ -44,7 +44,7 @@ namespace Game
 
         public void ChangeAttackState(bool isAttack)
         {
-            PROPERTY_SKILL_USED.SetValues(isAttack, Skill.Slash);
+            PROPERTY_SKILL_USED.SetValues(isAttack, SkillEnum.Slash);
         }
 
         public void SwitchMovement(bool isMove)

@@ -14,9 +14,11 @@ namespace Game
         private float _physicalResistance;
         private float _armor;
 
+        public float Damage { get; private set; }
+        public float CastSpeed { get; private set; }
+        public float MaxHealth { get { return _health.MaxValue; } }
         public float CurrentHealth { get { return _health.Value; } }
         public float PrecentCurrentHealth { get { return _health.PercentValue; } }
-        public float MaxHealth { get { return _health.MaxValue; } }
 
         protected virtual void Awake()
         {
@@ -29,11 +31,8 @@ namespace Game
         {
             _physicalResistance = 0.1f;
             _armor = 0.05f;
-        }
-
-        private void OnDisable()
-        {
-            StopAllCoroutines();
+            Damage = 15f;
+            CastSpeed = 0.6f;
         }
 
         public void SubscribeHeathChanged(Action<float> function)
@@ -46,11 +45,12 @@ namespace Game
             _health.OnChange -= function;
         }
 
-        public void TakeDamage(float damage)
+        public float TakeDamage(float damage)
         {
             damage -= damage * _physicalResistance * _armor;
             damage -= damage * _armor;
             _health.Decrease(damage);
+            return damage;
         }
 
         public void TakeHealing(float healthPoints)

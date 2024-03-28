@@ -1,6 +1,6 @@
 namespace Game
 {
-    public enum CharacterState
+    public enum CharacterStateEnum
     {
         Patrolling,
         Attack,

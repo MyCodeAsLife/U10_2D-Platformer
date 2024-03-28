@@ -1,7 +1,7 @@
 ﻿
 namespace Game
 {
-    public enum Skill
+    public enum SkillEnum
     {
         Slash,
         Vampirism,

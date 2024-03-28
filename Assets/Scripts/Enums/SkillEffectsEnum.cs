@@ -1,10 +1,11 @@
 ﻿
 namespace Game
 {
-    public enum SkillEffect
+    public enum SkillEffectsEnum
     {
-        Healing,
         Damage,
+        Healing,
+        Vampirism,
         Buff,
         Debuff,
     }

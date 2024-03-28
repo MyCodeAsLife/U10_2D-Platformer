@@ -11,7 +11,7 @@ namespace Game
         public readonly SingleReactiveProperty<bool> PROPERTY_GROUNDED = new();
         public readonly SingleReactiveProperty<bool> PROPERTY_RUNNING = new();
         public readonly SingleReactiveProperty<bool> PROPERTY_DIRECTION = new();
-        public readonly DoubleReactiveProperty<bool, Skill> PROPERTY_SKILL_USED = new();
+        public readonly DoubleReactiveProperty<bool, SkillEnum> PROPERTY_SKILL_USED = new();
 
         [SerializeField] private LayerMask _layerObstacle;
         [SerializeField] private Transform _groundChecker;
@@ -176,22 +176,22 @@ namespace Game
 
         private void AttackEnable(InputAction.CallbackContext obj)
         {
-            PROPERTY_SKILL_USED.SetValues(true, Skill.Slash);
+            PROPERTY_SKILL_USED.SetValues(true, SkillEnum.Slash);
         }
 
         private void AttackDisable(InputAction.CallbackContext obj)
         {
-            PROPERTY_SKILL_USED.SetValues(false, Skill.Slash);
+            PROPERTY_SKILL_USED.SetValues(false, SkillEnum.Slash);
         }
 
         private void VampirismEnable(InputAction.CallbackContext obj)
         {
-            PROPERTY_SKILL_USED.SetValues(true, Skill.Vampirism);
+            PROPERTY_SKILL_USED.SetValues(true, SkillEnum.Vampirism);
         }
 
         private void VampirismDisable(InputAction.CallbackContext obj)
         {
-            PROPERTY_SKILL_USED.SetValues(false, Skill.Vampirism);
+            PROPERTY_SKILL_USED.SetValues(false, SkillEnum.Vampirism);
         }
 
         private IEnumerator UnlockJump()

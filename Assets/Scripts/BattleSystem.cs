@@ -6,43 +6,54 @@ using UnityEngine;
 
 public class BattleSystem : MonoBehaviour
 {
+    private Character _character;
     private List<ISkill> _skillList = new();
     private ISkill _currentSkill;
-    private Coroutine _strike;
-
-    private float _damage;
-    private float _attackSpeed;
-    private float _visibilityTimeSlash;
+    private Coroutine _usingSkill;
 
     private bool _flipX;
-    private bool _isAttackAttempt;
-    private bool _canAttack;
+    private bool _isUseSkillAttempt;
+    private bool _canUseSkill;
 
     private void Start()
     {
-        _damage = 10f;
-        _attackSpeed = 0.4f;
-        _visibilityTimeSlash = 0.1f;
+        _character = GetComponent<Character>();
         _flipX = false;
-        _isAttackAttempt = false;
-        _canAttack = true;
+        _isUseSkillAttempt = false;
+        _canUseSkill = true;
+    }
+
+    private void OnDisable()
+    {
+        StopAllCoroutines();
     }
 
     public void SetPrefabSkillList(List<ISkill> prefabSkillList)
     {
         for (int i = 0; i < prefabSkillList.Count; i++)
+        {
             _skillList.Add(Instantiate(prefabSkillList[i]));
+            _skillList[i].SetOwner(transform);
+        }
     }
 
-    public void ChangeSkillUsed(bool isAttackAttempt, Skill skillName)
+    public void ChangeSkillUsed(bool isAttackAttempt, SkillEnum skillName)
     {
-        _currentSkill = null;
-        _isAttackAttempt = isAttackAttempt;
+        if (_currentSkill != null)
+        {
+            _currentSkill.OnHit -= ImpactToTarget;
+            _currentSkill = null;
+        }
+
+        _isUseSkillAttempt = isAttackAttempt;
 
         for (int i = 0; i < _skillList.Count; i++)
         {
             if (_skillList[i].NAME == skillName)
+            {
                 _currentSkill = _skillList[i];
+                _currentSkill.OnHit += ImpactToTarget;
+            }
         }
 
         if (_currentSkill == null)
@@ -53,18 +64,8 @@ public class BattleSystem : MonoBehaviour
 
     public void ChangeAttackState()
     {
-        if (_isAttackAttempt && _strike == null)
-        {
-            _currentSkill.OnHit += Attack;
-            _strike = StartCoroutine(Strike());
-        }
-        else if (_strike != null)
-        {
-            StopCoroutine(_strike);
-            _currentSkill.OnHit -= Attack;
-            _canAttack = true;
-            _strike = null;
-        }
+        if (_isUseSkillAttempt && _usingSkill == null)
+            _usingSkill = StartCoroutine(UsingSkill());
     }
 
     public void ChangeDirection(bool flipX)
@@ -72,36 +73,41 @@ public class BattleSystem : MonoBehaviour
         _flipX = flipX;
     }
 
-    private void Attack(IDamageble enemy)               // Переделать под прием эффектов скила. и выбор действия в зависимости от эффектов.
+    private void ImpactToTarget(IInteractive target, List<SkillEffectsEnum> skillEffects)
     {
-        enemy.TakeDamage(_damage);                      // Сделать возврат "прошедшего по здоровью" урона, для вампиризма и/или для чегонить еще
+        float damageDone = 0;
+
+        if (target is IDamageble)
+            damageDone = (target as IDamageble).TakeDamage(_character.Damage);
+
+        if (skillEffects.Contains(SkillEffectsEnum.Vampirism))
+            _character.TakeHealing(damageDone);
     }
 
-    private void DisableSlash()
+    private IEnumerator UsingSkill()
     {
-        _currentSkill.gameObject.SetActive(false);
-    }
+        WaitForSeconds _delay = new WaitForSeconds(_character.CastSpeed);
 
-    private IEnumerator Strike()
-    {
-        WaitForSeconds _delay = new WaitForSeconds(_attackSpeed);
-
-        while (_isAttackAttempt && _canAttack)
+        while (_isUseSkillAttempt && _canUseSkill)
         {
-            _canAttack = false;
-            _currentSkill.transform.position = transform.position;
+            if (_currentSkill.IsReady)
+            {
+                _canUseSkill = false;
+                _currentSkill.transform.position = transform.position;
 
-            if (_flipX)
-                _currentSkill.transform.localScale = new Vector3(-1, _currentSkill.transform.localScale.y, _currentSkill.transform.localScale.z);
-            else
-                _currentSkill.transform.localScale = new Vector3(1, _currentSkill.transform.localScale.y, _currentSkill.transform.localScale.z);
+                if (_flipX)
+                    _currentSkill.transform.localScale = new Vector3(-1, _currentSkill.transform.localScale.y, _currentSkill.transform.localScale.z);
+                else
+                    _currentSkill.transform.localScale = new Vector3(1, _currentSkill.transform.localScale.y, _currentSkill.transform.localScale.z);
 
-            _currentSkill.gameObject.SetActive(true);
-            Invoke(nameof(DisableSlash), _visibilityTimeSlash);
+                _currentSkill.Use();
+            }
+
             yield return _delay;
-            _canAttack = true;
+            _canUseSkill = true;
         }
 
-        _strike = null;
+        _usingSkill = null;
+        _canUseSkill = true;
     }
 }

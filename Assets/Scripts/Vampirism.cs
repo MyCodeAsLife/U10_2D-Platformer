@@ -1,28 +1,55 @@
-using System;
 using System.Collections.Generic;
+using System;
 using UnityEngine;
+using System.Collections;
 
 namespace Game
 {
     public class Vampirism : ISkill
     {
-        public override event Action<IDamageble> OnHit;
+        public override event Action<IInteractive, List<SkillEffectsEnum>> OnHit;
 
-        public Vampirism() : base(Skill.Vampirism)
+        public Vampirism() : base(SkillEnum.Vampirism)
         {
-            AffectedArea = 3f;
+            Radius = 3f;
+            Duration = 6f;
+            RollbackTime = 6f;
+            SkillEffects.Add(SkillEffectsEnum.Vampirism);
         }
 
-        private void OnEnable()
+        public override void Use()
         {
-            List<Collider2D> hits = new List<Collider2D>();
-            //Physics2D.OverlapBox(transform.position, _radius, 0, _contactFilter, hits);
-            Physics2D.OverlapCircle(transform.position, AffectedArea, ContactFilter, hits);
+            Physics2D.OverlapCircle(transform.position, Radius, ContactFilter, hits);
 
             foreach (Collider2D hit in hits)
             {
-                if (hit.TryGetComponent<IDamageble>(out IDamageble obj))
-                    OnHit?.Invoke(obj);
+                if (hit.TryGetComponent<IDamageble>(out IDamageble obj) && IsReady)
+                {
+                    IsReady = false;
+                    StartCoroutine(UsingSkill(hit));
+                    break;
+                }
+            }
+        }
+
+        private IEnumerator UsingSkill(Collider2D obj)
+        {
+            float time = 0;
+            float tickTime = 0.3f;
+            var tick = new WaitForSeconds(tickTime);
+            obj.TryGetComponent<IDamageble>(out IDamageble enemy);
+
+            while (time < Duration)
+            {
+                if (Vector2.Distance(obj.transform.position, Owner.position) > Radius)
+                    break;
+
+                OnHit?.Invoke(enemy, SkillEffects);
+                time += tickTime;
+
+                Debug.Log(time);
+
+                yield return tick;
             }
         }
     }
