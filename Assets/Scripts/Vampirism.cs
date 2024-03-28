@@ -46,9 +46,6 @@ namespace Game
 
                 OnHit?.Invoke(enemy, SkillEffects);
                 time += tickTime;
-
-                Debug.Log(time);
-
                 yield return tick;
             }
         }
