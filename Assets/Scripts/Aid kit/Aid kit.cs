@@ -7,13 +7,13 @@ namespace Game
     {
         [SerializeField] private float _healtPoints;
 
-        public event Action OnPickup;
+        public event Action PickedUp;
 
         private void OnTriggerEnter2D(Collider2D collision)
         {
             if (collision.TryGetComponent<Character>(out Character character))
             {
-                OnPickup?.Invoke();
+                PickedUp?.Invoke();
                 character.TakeHealing(_healtPoints);
             }
         }

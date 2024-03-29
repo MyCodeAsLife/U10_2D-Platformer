@@ -8,10 +8,10 @@ namespace Game
     [RequireComponent(typeof(Rigidbody2D))]
     public class PlayerController : MonoBehaviour
     {
-        public readonly SingleReactiveProperty<bool> PROPERTY_GROUNDED = new();
-        public readonly SingleReactiveProperty<bool> PROPERTY_RUNNING = new();
-        public readonly SingleReactiveProperty<bool> PROPERTY_DIRECTION = new();
-        public readonly DoubleReactiveProperty<bool, SkillEnum> PROPERTY_SKILL_USED = new();
+        public readonly SingleReactiveProperty<bool> IsGrounded = new();
+        public readonly SingleReactiveProperty<bool> IsRunning = new();
+        public readonly SingleReactiveProperty<bool> IsDirectionLeft = new();
+        public readonly DoubleReactiveProperty<bool, SkillEnum> IsSkillUsed = new();
 
         [SerializeField] private LayerMask _layerObstacle;
         [SerializeField] private Transform _groundChecker;
@@ -27,12 +27,12 @@ namespace Game
         private bool _onJump;
         private bool _isBlocksJump;
 
-        public event Action MoveUpdate;
+        public event Action MovementUpdate;
 
         private void Awake()
         {
             _onMoveVertical = false;
-            PROPERTY_RUNNING.Value = false;
+            IsRunning.Value = false;
             _onJump = false;
             _isBlocksJump = false;
             _layerObstacle = 64;
@@ -47,124 +47,122 @@ namespace Game
         private void OnEnable()
         {
             _playerInputActions.Enable();
-            _playerInputActions.Movement.Jump.performed += JumpEnable;
-            _playerInputActions.Movement.Jump.canceled += JumpDisable;
-            _playerInputActions.Movement.MoveHorizontal.performed += MoveHorizontalEnable;
-            _playerInputActions.Movement.MoveVertical.performed += MoveVerticalEnable;
-            _playerInputActions.Movement.MoveHorizontal.canceled += MoveHorizontalDisable;
-            _playerInputActions.Movement.MoveVertical.canceled += MoveVerticalDisable;
-            _playerInputActions.Movement.Attack.performed += AttackEnable;
-            _playerInputActions.Movement.Attack.canceled += AttackDisable;
-            _playerInputActions.Movement.Vampirism.performed += VampirismEnable;
-            _playerInputActions.Movement.Vampirism.canceled += VampirismDisable;
+            _playerInputActions.Movement.Jump.performed += OnEnableJump;
+            _playerInputActions.Movement.Jump.canceled += OnDisableJump;
+            _playerInputActions.Movement.MoveHorizontal.performed += OnEnableHorizontalMovement;
+            _playerInputActions.Movement.MoveVertical.performed += OnEnableVerticalMovement;
+            _playerInputActions.Movement.MoveHorizontal.canceled += OnDisableHorizontalMovement;
+            _playerInputActions.Movement.MoveVertical.canceled += OnDisableVerticalMovement;
+            _playerInputActions.Movement.Attack.performed += OnAttackEnable;
+            _playerInputActions.Movement.Attack.canceled += OnAttackDisable;
+            _playerInputActions.Movement.Vampirism.performed += OnVampirismEnable;
+            _playerInputActions.Movement.Vampirism.canceled += OnVampirismDisable;
         }
 
         private void OnDisable()
         {
-            _playerInputActions.Movement.Jump.performed -= JumpEnable;
-            _playerInputActions.Movement.Jump.canceled -= JumpDisable;
-            _playerInputActions.Movement.MoveHorizontal.performed -= MoveHorizontalEnable;
-            _playerInputActions.Movement.MoveVertical.performed -= MoveVerticalEnable;
-            _playerInputActions.Movement.MoveHorizontal.canceled -= MoveHorizontalDisable;
-            _playerInputActions.Movement.MoveVertical.canceled -= MoveVerticalDisable;
-            _playerInputActions.Movement.Attack.performed -= AttackEnable;
-            _playerInputActions.Movement.Attack.canceled -= AttackDisable;
-            _playerInputActions.Movement.Vampirism.performed -= VampirismEnable;
-            _playerInputActions.Movement.Vampirism.canceled -= VampirismDisable;
+            _playerInputActions.Movement.Jump.performed -= OnEnableJump;
+            _playerInputActions.Movement.Jump.canceled -= OnDisableJump;
+            _playerInputActions.Movement.MoveHorizontal.performed -= OnEnableHorizontalMovement;
+            _playerInputActions.Movement.MoveVertical.performed -= OnEnableVerticalMovement;
+            _playerInputActions.Movement.MoveHorizontal.canceled -= OnDisableHorizontalMovement;
+            _playerInputActions.Movement.MoveVertical.canceled -= OnDisableVerticalMovement;
+            _playerInputActions.Movement.Attack.performed -= OnAttackEnable;
+            _playerInputActions.Movement.Attack.canceled -= OnAttackDisable;
+            _playerInputActions.Movement.Vampirism.performed -= OnVampirismEnable;
+            _playerInputActions.Movement.Vampirism.canceled -= OnVampirismDisable;
             _playerInputActions.Disable();
-
-            StopAllCoroutines();
         }
 
         private void FixedUpdate()
         {
             GroundCheck();
-            MoveUpdate?.Invoke();
+            MovementUpdate?.Invoke();
         }
 
         private float GetMovementHorizontalVector() => _playerInputActions.Movement.MoveHorizontal.ReadValue<float>();
         private float GetMovementVerticalVector() => _playerInputActions.Movement.MoveVertical.ReadValue<float>();
 
-        private void MoveHorizontalEnable(InputAction.CallbackContext obj)
+        private void OnEnableHorizontalMovement(InputAction.CallbackContext obj)
         {
-            MoveHorizontalCalculate();
+            CalculateHorizontalMovement();
 
             if (_InputVector.x < 0)
-                PROPERTY_DIRECTION.Value = true;
+                IsDirectionLeft.Value = true;
             else if (_InputVector.x > 0)
-                PROPERTY_DIRECTION.Value = false;
+                IsDirectionLeft.Value = false;
 
-            if (PROPERTY_RUNNING.Value == false)
-                MoveUpdate += MoveHorizontal;
+            if (IsRunning.Value == false)
+                MovementUpdate += OnHorizontalMovement;
         }
 
-        private void MoveVerticalEnable(InputAction.CallbackContext obj)
+        private void OnEnableVerticalMovement(InputAction.CallbackContext obj)
         {
-            MoveVerticalCalculate();
+            CalculateVerticalMovement();
 
             if (_onMoveVertical == false)
             {
                 _onMoveVertical = true;
-                MoveUpdate += MoveVertical;
+                MovementUpdate += OnVerticalMovement;
             }
         }
 
-        private void MoveHorizontalDisable(InputAction.CallbackContext obj)
+        private void OnDisableHorizontalMovement(InputAction.CallbackContext obj)
         {
-            PROPERTY_RUNNING.Value = false;
-            MoveUpdate -= MoveHorizontal;
+            IsRunning.Value = false;
+            MovementUpdate -= OnHorizontalMovement;
         }
 
-        private void MoveVerticalDisable(InputAction.CallbackContext obj)
+        private void OnDisableVerticalMovement(InputAction.CallbackContext obj)
         {
             _onMoveVertical = false;
-            MoveUpdate -= MoveVertical;
+            MovementUpdate -= OnVerticalMovement;
         }
 
         private void GroundCheck()
         {
-            PROPERTY_GROUNDED.Value = Physics2D.OverlapCapsule(_groundChecker.position, _groundCheckCollider.size, CapsuleDirection2D.Horizontal, 0, _layerObstacle);
+            IsGrounded.Value = Physics2D.OverlapCapsule(_groundChecker.position, _groundCheckCollider.size, CapsuleDirection2D.Horizontal, 0, _layerObstacle);
         }
 
-        private void MoveHorizontalCalculate()
+        private void CalculateHorizontalMovement()
         {
             _InputVector.x = GetMovementHorizontalVector() * _moveSpeed;
         }
 
-        private void MoveVerticalCalculate()
+        private void CalculateVerticalMovement()
         {
             _InputVector.y = GetMovementVerticalVector() * _moveSpeed;
         }
 
-        private void MoveHorizontal()
+        private void OnHorizontalMovement()
         {
-            PROPERTY_RUNNING.Value = (int)_InputVector.x != 0;
+            IsRunning.Value = (int)_InputVector.x != 0;
             _rigidbody.velocity = new Vector2(_InputVector.x * _moveSpeed * Time.deltaTime, _rigidbody.velocity.y);
         }
 
-        private void MoveVertical()
+        private void OnVerticalMovement()
         {
             _rigidbody.velocity = new Vector2(_rigidbody.velocity.x, _InputVector.y * _moveSpeed * Time.deltaTime);
         }
 
-        private void JumpEnable(InputAction.CallbackContext obj)
+        private void OnEnableJump(InputAction.CallbackContext obj)
         {
             if (_onJump == false)
             {
                 _onJump = true;
-                MoveUpdate += Jump;
+                MovementUpdate += OnJumped;
             }
         }
 
-        private void JumpDisable(InputAction.CallbackContext obj)
+        private void OnDisableJump(InputAction.CallbackContext obj)
         {
-            MoveUpdate -= Jump;
+            MovementUpdate -= OnJumped;
             _onJump = false;
         }
 
-        private void Jump()
+        private void OnJumped()
         {
-            if (PROPERTY_GROUNDED.Value && _isBlocksJump == false)
+            if (IsGrounded.Value && _isBlocksJump == false)
             {
                 _rigidbody.velocity = new Vector2(_rigidbody.velocity.x, 0);
                 _rigidbody.AddForce(Vector2.up * _jumpPower);
@@ -174,24 +172,24 @@ namespace Game
             }
         }
 
-        private void AttackEnable(InputAction.CallbackContext obj)
+        private void OnAttackEnable(InputAction.CallbackContext obj)
         {
-            PROPERTY_SKILL_USED.SetValues(true, SkillEnum.Slash);
+            IsSkillUsed.SetValues(true, SkillEnum.Slash);
         }
 
-        private void AttackDisable(InputAction.CallbackContext obj)
+        private void OnAttackDisable(InputAction.CallbackContext obj)
         {
-            PROPERTY_SKILL_USED.SetValues(false, SkillEnum.Slash);
+            IsSkillUsed.SetValues(false, SkillEnum.Slash);
         }
 
-        private void VampirismEnable(InputAction.CallbackContext obj)
+        private void OnVampirismEnable(InputAction.CallbackContext obj)
         {
-            PROPERTY_SKILL_USED.SetValues(true, SkillEnum.Vampirism);
+            IsSkillUsed.SetValues(true, SkillEnum.Vampirism);
         }
 
-        private void VampirismDisable(InputAction.CallbackContext obj)
+        private void OnVampirismDisable(InputAction.CallbackContext obj)
         {
-            PROPERTY_SKILL_USED.SetValues(false, SkillEnum.Vampirism);
+            IsSkillUsed.SetValues(false, SkillEnum.Vampirism);
         }
 
         private IEnumerator UnlockJump()

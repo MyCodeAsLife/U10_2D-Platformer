@@ -12,17 +12,17 @@ namespace Game
         protected Animator _animator;
         protected SpriteRenderer _spriteRenderer;
 
-        protected virtual void SwitchGrounded(bool isGrounded)
+        protected virtual void OnSwitchGrounded(bool isGrounded)
         {
             _animator.SetBool(Grounded, isGrounded);
         }
 
-        protected virtual void SwitchRunning(bool isRunning)
+        protected virtual void OnSwitchRunning(bool isRunning)
         {
             _animator.SetBool(Running, isRunning);
         }
 
-        protected virtual void SwitchDirection(bool isLeft)
+        protected virtual void OnSwitchDirection(bool isLeft)
         {
             _spriteRenderer.flipX = isLeft;
         }

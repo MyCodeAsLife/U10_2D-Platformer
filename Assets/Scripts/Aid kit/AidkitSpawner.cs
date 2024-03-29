@@ -14,9 +14,9 @@ namespace Game
             StartCoroutine(Spawn());
         }
 
-        public void Pickup()
+        public void OnPickedUp()
         {
-            _aidkit.OnPickup -= Pickup;
+            _aidkit.PickedUp -= OnPickedUp;
             Destroy(_aidkit.gameObject);
             StopAllCoroutines();
             StartCoroutine(Spawn());
@@ -28,7 +28,7 @@ namespace Game
 
             int randomIndex = Random.Range(0, _spawnPoints.Length);
             _aidkit = Instantiate(_prefab, _spawnPoints[randomIndex].position, Quaternion.identity);
-            _aidkit.OnPickup += Pickup;
+            _aidkit.PickedUp += OnPickedUp;
         }
     }
 }

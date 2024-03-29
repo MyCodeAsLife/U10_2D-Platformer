@@ -7,7 +7,7 @@ namespace Game
 {
     public class Vampirism : ISkill
     {
-        public override event Action<IInteractive, List<SkillEffectsEnum>> OnHit;
+        public override event Action<IInteractive, List<SkillEffectsEnum>> Hited;
 
         public Vampirism() : base(SkillEnum.Vampirism)
         {
@@ -44,7 +44,7 @@ namespace Game
                 if (Vector2.Distance(obj.transform.position, Owner.position) > Radius)
                     break;
 
-                OnHit?.Invoke(enemy, SkillEffects);
+                Hited?.Invoke(enemy, SkillEffects);
                 time += tickTime;
                 yield return tick;
             }

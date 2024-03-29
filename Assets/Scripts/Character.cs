@@ -31,18 +31,18 @@ namespace Game
         {
             _physicalResistance = 0.1f;
             _armor = 0.05f;
-            Damage = 15f;
+            Damage = 10f;
             CastSpeed = 0.6f;
         }
 
         public void SubscribeHeathChanged(Action<float> function)
         {
-            _health.OnChange += function;
+            _health.Changed += function;
         }
 
         public void UnsubscribeHeathChanged(Action<float> function)
         {
-            _health.OnChange -= function;
+            _health.Changed -= function;
         }
 
         public float TakeDamage(float damage)

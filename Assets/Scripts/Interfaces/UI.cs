@@ -13,16 +13,16 @@ namespace Game
 
         private void OnDisable()
         {
-            _character.UnsubscribeHeathChanged(ChangeHealth);
+            _character.UnsubscribeHeathChanged(OnChangeHealth);
         }
 
         private void Start()
         {
-            _character.SubscribeHeathChanged(ChangeHealth);
-            ChangeHealth(_character.PrecentCurrentHealth);
+            _character.SubscribeHeathChanged(OnChangeHealth);
+            OnChangeHealth(_character.PrecentCurrentHealth);
         }
 
-        private void ChangeHealth(float percentHealth)
+        private void OnChangeHealth(float percentHealth)
         {
             if (_changesSmoothly != null)
                 StopCoroutine(_changesSmoothly);

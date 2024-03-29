@@ -5,16 +5,16 @@ namespace Game
 {
     public class EnemyController : MonoBehaviour
     {
-        public readonly SingleReactiveProperty<bool> PROPERTY_RUNNING = new();
-        public readonly SingleReactiveProperty<bool> PROPERTY_DIRECTION = new();
-        public readonly DoubleReactiveProperty<bool, SkillEnum> PROPERTY_SKILL_USED = new();
+        public readonly SingleReactiveProperty<bool> IsRunning = new();
+        public readonly SingleReactiveProperty<bool> IsDirectionLeft = new();
+        public readonly DoubleReactiveProperty<bool, SkillEnum> IsSkillUsed = new();
 
         private float _moveSpeed;
         private float _minDistance;
         private float _newPosX;
         private float _distanceToTargetX;
 
-        public event Action onMoveUpdate;
+        public event Action MovementUpdate;
 
         public Vector3 TargetPoint { get; set; }
         public float MinDistance { get { return _minDistance; } }
@@ -27,8 +27,7 @@ namespace Game
 
         private void OnDisable()
         {
-            onMoveUpdate -= Movement;
-            StopAllCoroutines();
+            MovementUpdate -= OnMovementUpdate;
         }
 
         private void Start()
@@ -39,25 +38,25 @@ namespace Game
 
         private void Update()
         {
-            onMoveUpdate?.Invoke();
+            MovementUpdate?.Invoke();
         }
 
         public void ChangeAttackState(bool isAttack)
         {
-            PROPERTY_SKILL_USED.SetValues(isAttack, SkillEnum.Slash);
+            IsSkillUsed.SetValues(isAttack, SkillEnum.Slash);
         }
 
         public void SwitchMovement(bool isMove)
         {
-            PROPERTY_RUNNING.Value = isMove;
+            IsRunning.Value = isMove;
 
-            if (PROPERTY_RUNNING.Value)
-                onMoveUpdate += Movement;
+            if (IsRunning.Value)
+                MovementUpdate += OnMovementUpdate;
             else
-                onMoveUpdate -= Movement;
+                MovementUpdate -= OnMovementUpdate;
         }
 
-        public void MoveCalculate()
+        public void CalculateMovement()
         {
             _newPosX = Mathf.MoveTowards(transform.position.x, TargetPoint.x, _moveSpeed * Time.deltaTime);
             _distanceToTargetX = transform.position.x - TargetPoint.x;
@@ -73,12 +72,12 @@ namespace Game
 
         private void Rotate()
         {
-            PROPERTY_DIRECTION.Value = _newPosX - transform.position.x > 0;
+            IsDirectionLeft.Value = _newPosX - transform.position.x > 0;
         }
 
-        private void Movement()
+        private void OnMovementUpdate()
         {
-            MoveCalculate();
+            CalculateMovement();
             Rotate();
 
             if (_distanceToTargetX <= _minDistance)

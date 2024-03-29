@@ -11,7 +11,7 @@ namespace Game
 
         private Animator _animator;
 
-        public event Action OnPickup;
+        public event Action PickedUp;
 
         private void Awake()
         {
@@ -25,13 +25,13 @@ namespace Game
 
         private void OnDisable()
         {
-            StopAllCoroutines();
+            StopCoroutine(Shine());
         }
 
         private void OnTriggerEnter2D(Collider2D collision)
         {
             if (collision.TryGetComponent<PlayerController>(out PlayerController enemy))
-                OnPickup?.Invoke();
+                PickedUp?.Invoke();
         }
 
         private IEnumerator Shine()

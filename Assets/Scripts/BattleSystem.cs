@@ -25,7 +25,8 @@ public class BattleSystem : MonoBehaviour
 
     private void OnDisable()
     {
-        StopAllCoroutines();
+        if (_usingSkill != null)
+            StopCoroutine(_usingSkill);
     }
 
     public void SetPrefabSkillList(List<ISkill> prefabSkillList)
@@ -37,11 +38,11 @@ public class BattleSystem : MonoBehaviour
         }
     }
 
-    public void ChangeSkillUsed(bool isAttackAttempt, SkillEnum skillName)
+    public void OnChangeSkillUsed(bool isAttackAttempt, SkillEnum skillName)
     {
         if (_currentSkill != null)
         {
-            _currentSkill.OnHit -= ImpactToTarget;
+            _currentSkill.Hited -= OnImpactToTarget;
             _currentSkill = null;
         }
 
@@ -52,7 +53,7 @@ public class BattleSystem : MonoBehaviour
             if (_skillList[i].NAME == skillName)
             {
                 _currentSkill = _skillList[i];
-                _currentSkill.OnHit += ImpactToTarget;
+                _currentSkill.Hited += OnImpactToTarget;
             }
         }
 
@@ -68,12 +69,12 @@ public class BattleSystem : MonoBehaviour
             _usingSkill = StartCoroutine(UsingSkill());
     }
 
-    public void ChangeDirection(bool flipX)
+    public void OnChangeDirection(bool flipX)
     {
         _flipX = flipX;
     }
 
-    private void ImpactToTarget(IInteractive target, List<SkillEffectsEnum> skillEffects)
+    private void OnImpactToTarget(IInteractive target, List<SkillEffectsEnum> skillEffects)
     {
         float damageDone = 0;
 

@@ -7,7 +7,7 @@ namespace Game
         public Slash() : base(SkillEnum.Slash)
         {
             Radius = 2f;
-            Duration = 0.05f;
+            Duration = 0.03f;
             RollbackTime = 0.05f;
             SkillEffects.Add(SkillEffectsEnum.Damage);
         }

@@ -41,7 +41,11 @@ namespace Game
 
         private void OnDisable()
         {
-            StopAllCoroutines();
+            if (_currentBehavior != null)
+                StopCoroutine(_currentBehavior);
+
+            if (_stateSelection != null)
+                StopCoroutine(_stateSelection);
         }
 
         private void Start()
@@ -156,11 +160,11 @@ namespace Game
             while (true)
             {
                 AttackTargetSelect();
-                _enemyController.MoveCalculate();
+                _enemyController.CalculateMovement();
                 float distanceToTarget = Vector2.Distance(transform.position, _enemyController.TargetPoint);
 
                 if (_enemyController.DistanceToTargetX > _enemyController.MinDistance)
-                    if (_enemyController.PROPERTY_RUNNING.Value == false)
+                    if (_enemyController.IsRunning.Value == false)
                         _enemyController.SwitchMovement(true);
 
                 _enemyController.ChangeAttackState(distanceToTarget < _attackRange);

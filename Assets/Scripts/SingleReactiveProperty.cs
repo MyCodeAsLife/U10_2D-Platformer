@@ -4,7 +4,7 @@ namespace Game
 {
     public class SingleReactiveProperty<T>
     {
-        public event Action<T> OnChanged;
+        public event Action<T> Changed;
 
         private T _value;
 
@@ -14,7 +14,7 @@ namespace Game
             set
             {
                 _value = value;
-                OnChanged?.Invoke(_value);
+                Changed?.Invoke(_value);
             }
         }
     }

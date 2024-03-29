@@ -14,11 +14,11 @@ namespace Game
             StartCoroutine(Spawn());
         }
 
-        public void Pickup()
+        public void OnPickedUp()
         {
-            _gem.OnPickup -= Pickup;
+            _gem.PickedUp -= OnPickedUp;
             Destroy(_gem.gameObject);
-            StopAllCoroutines();
+            StopCoroutine(Spawn());
             StartCoroutine(Spawn());
         }
 
@@ -28,7 +28,7 @@ namespace Game
 
             int randomIndex = Random.Range(0, _spawnPoints.Length);
             _gem = Instantiate(_prefab, _spawnPoints[randomIndex].position, Quaternion.identity);
-            _gem.OnPickup += Pickup;
+            _gem.PickedUp += OnPickedUp;
         }
     }
 }

@@ -17,7 +17,7 @@ namespace Game
 
         private float _currentTime;
 
-        public virtual event Action<IInteractive, List<SkillEffectsEnum>> OnHit;
+        public virtual event Action<IInteractive, List<SkillEffectsEnum>> Hited;
 
         public bool IsReady { get; protected set; }
         public float Duration { get; protected set; }
@@ -43,7 +43,7 @@ namespace Game
             {
                 if (hit.TryGetComponent<IInteractive>(out IInteractive obj))
                 {
-                    OnHit?.Invoke(obj, SkillEffects);
+                    Hited?.Invoke(obj, SkillEffects);
                     IsReady = false;
                 }
             }

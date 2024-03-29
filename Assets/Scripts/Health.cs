@@ -12,7 +12,7 @@ namespace Game
         private float _currentHealthPoint;
         private float _onePercent;
 
-        public event Action<float> OnChange;
+        public event Action<float> Changed;
 
         public Health(float healthPoint)
         {
@@ -56,7 +56,7 @@ namespace Game
         private void Change(float currentHealthPoint)
         {
             _currentHealthPoint = Mathf.Clamp(currentHealthPoint, MinHealthPoint, _maxHealthPoint);
-            OnChange?.Invoke(GetProcentValue());
+            Changed?.Invoke(GetProcentValue());
         }
 
         private float GetProcentValue()

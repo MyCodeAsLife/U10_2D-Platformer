@@ -4,7 +4,7 @@ namespace Game
 {
     public class DoubleReactiveProperty<T1, T2>
     {
-        public event Action<T1, T2> OnChanged;
+        public event Action<T1, T2> Changed;
 
         private T1 _value1;
         private T2 _value2;
@@ -15,7 +15,7 @@ namespace Game
             set
             {
                 _value1 = value;
-                OnChanged?.Invoke(_value1, _value2);
+                Changed?.Invoke(_value1, _value2);
             }
         }
 
@@ -25,7 +25,7 @@ namespace Game
             set
             {
                 _value2 = value;
-                OnChanged?.Invoke(_value1, _value2);
+                Changed?.Invoke(_value1, _value2);
             }
         }
 
@@ -33,7 +33,7 @@ namespace Game
         {
             _value1 = value1;
             _value2 = value2;
-            OnChanged?.Invoke(_value1, _value2);
+            Changed?.Invoke(_value1, _value2);
         }
     }
 }

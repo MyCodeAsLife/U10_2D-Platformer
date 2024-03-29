@@ -15,14 +15,14 @@ namespace Game
 
         private void OnEnable()
         {
-            _enemyController.PROPERTY_RUNNING.OnChanged += SwitchRunning;
-            _enemyController.PROPERTY_DIRECTION.OnChanged += SwitchDirection;
+            _enemyController.IsRunning.Changed += OnSwitchRunning;
+            _enemyController.IsDirectionLeft.Changed += OnSwitchDirection;
         }
 
         private void OnDisable()
         {
-            _enemyController.PROPERTY_RUNNING.OnChanged -= SwitchRunning;
-            _enemyController.PROPERTY_DIRECTION.OnChanged -= SwitchDirection;
+            _enemyController.IsRunning.Changed -= OnSwitchRunning;
+            _enemyController.IsDirectionLeft.Changed -= OnSwitchDirection;
         }
     }
 }
