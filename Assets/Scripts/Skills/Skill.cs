@@ -5,13 +5,13 @@ using UnityEngine;
 
 namespace Game
 {
-    public abstract class ISkill : MonoBehaviour
+    public abstract class Skill : MonoBehaviour
     {
-        public readonly SkillEnum NAME;
+        public readonly SkillEnum Name;
 
         [SerializeField] protected ContactFilter2D ContactFilter;
 
-        protected List<Collider2D> hits = new List<Collider2D>();
+        protected List<Collider2D> Hits = new List<Collider2D>();
         protected Transform Owner;
         protected float Radius;
 
@@ -24,9 +24,9 @@ namespace Game
         public List<SkillEffectsEnum> SkillEffects { get; protected set; }
         public float RollbackTime { get; protected set; }
 
-        public ISkill(SkillEnum skillName)
+        public Skill(SkillEnum skillName)
         {
-            NAME = skillName;
+            Name = skillName;
             IsReady = true;
             SkillEffects = new List<SkillEffectsEnum>();
         }
@@ -39,7 +39,7 @@ namespace Game
 
         public virtual void Use()
         {
-            foreach (Collider2D hit in hits)
+            foreach (Collider2D hit in Hits)
             {
                 if (hit.TryGetComponent<IInteractive>(out IInteractive obj))
                 {

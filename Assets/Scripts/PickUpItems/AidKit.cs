@@ -3,11 +3,11 @@ using UnityEngine;
 
 namespace Game
 {
-    public class Aidkit : MonoBehaviour
+    public class Aidkit : PickUpItem
     {
         [SerializeField] private float _healtPoints;
 
-        public event Action PickedUp;
+        public override event Action PickedUp;
 
         private void OnTriggerEnter2D(Collider2D collision)
         {

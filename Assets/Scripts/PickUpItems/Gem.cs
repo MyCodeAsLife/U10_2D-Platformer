@@ -5,13 +5,13 @@ using UnityEngine;
 namespace Game
 {
     [RequireComponent(typeof(Animator))]
-    public class Gem : MonoBehaviour
+    public class Gem : PickUpItem
     {
         private readonly int ShineTrigger = Animator.StringToHash("isShine");
 
         private Animator _animator;
 
-        public event Action PickedUp;
+        public override event Action PickedUp;
 
         private void Awake()
         {
@@ -30,7 +30,7 @@ namespace Game
 
         private void OnTriggerEnter2D(Collider2D collision)
         {
-            if (collision.TryGetComponent<PlayerController>(out PlayerController enemy))
+            if (collision.TryGetComponent<PlayerInputController>(out PlayerInputController enemy))
                 PickedUp?.Invoke();
         }
 
@@ -38,8 +38,9 @@ namespace Game
         {
             const float Second = 3f;
             var wait = new WaitForSeconds(Second);
+            bool isShine = true;
 
-            while (true)
+            while (isShine)
             {
                 _animator.SetTrigger(ShineTrigger);
                 yield return wait;

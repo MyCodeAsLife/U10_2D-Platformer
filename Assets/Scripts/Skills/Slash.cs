@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace Game
 {
-    public class Slash : ISkill
+    public class Slash : Skill
     {
         public Slash() : base(SkillEnum.Slash)
         {
@@ -14,7 +14,7 @@ namespace Game
 
         public override void Use()
         {
-            Physics2D.OverlapBox(transform.position, new Vector2(Radius, Radius), 0, ContactFilter, hits);
+            Physics2D.OverlapBox(transform.position, new Vector2(Radius, Radius), 0, ContactFilter, Hits);
             base.Use();
         }
     }

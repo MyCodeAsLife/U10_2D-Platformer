@@ -7,8 +7,8 @@ using UnityEngine;
 public class BattleSystem : MonoBehaviour
 {
     private Character _character;
-    private List<ISkill> _skillList = new();
-    private ISkill _currentSkill;
+    private List<Skill> _skillList = new();
+    private Skill _currentSkill;
     private Coroutine _usingSkill;
 
     private bool _flipX;
@@ -29,7 +29,7 @@ public class BattleSystem : MonoBehaviour
             StopCoroutine(_usingSkill);
     }
 
-    public void SetPrefabSkillList(List<ISkill> prefabSkillList)
+    public void SetPrefabSkillList(List<Skill> prefabSkillList)
     {
         for (int i = 0; i < prefabSkillList.Count; i++)
         {
@@ -50,7 +50,7 @@ public class BattleSystem : MonoBehaviour
 
         for (int i = 0; i < _skillList.Count; i++)
         {
-            if (_skillList[i].NAME == skillName)
+            if (_skillList[i].Name == skillName)
             {
                 _currentSkill = _skillList[i];
                 _currentSkill.Hited += OnImpactToTarget;

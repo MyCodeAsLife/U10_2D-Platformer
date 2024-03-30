@@ -8,7 +8,7 @@ namespace Game
     {
         protected BattleSystem BattleSystem;
 
-        [SerializeField] private List<ISkill> prefabSkillList;
+        [SerializeField] private List<Skill> prefabSkillList;
 
         private Health _health;
         private float _physicalResistance;

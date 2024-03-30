@@ -9,22 +9,22 @@ namespace Game
         protected readonly int Running = Animator.StringToHash("isRunning");
         protected readonly int Grounded = Animator.StringToHash("isGrounded");
 
-        protected Animator _animator;
-        protected SpriteRenderer _spriteRenderer;
+        protected Animator Animator;
+        protected SpriteRenderer SpriteRenderer;
 
         protected virtual void OnSwitchGrounded(bool isGrounded)
         {
-            _animator.SetBool(Grounded, isGrounded);
+            Animator.SetBool(Grounded, isGrounded);
         }
 
         protected virtual void OnSwitchRunning(bool isRunning)
         {
-            _animator.SetBool(Running, isRunning);
+            Animator.SetBool(Running, isRunning);
         }
 
         protected virtual void OnSwitchDirection(bool isLeft)
         {
-            _spriteRenderer.flipX = isLeft;
+            SpriteRenderer.flipX = isLeft;
         }
     }
 }

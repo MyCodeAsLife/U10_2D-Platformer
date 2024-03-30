@@ -111,7 +111,7 @@ namespace Game
             }
         }
 
-        private void AttackTargetSelect()
+        private void SelectAttackTarget()
         {
             if (_enemies.Count > 0)
             {
@@ -159,7 +159,7 @@ namespace Game
 
             while (true)
             {
-                AttackTargetSelect();
+                SelectAttackTarget();
                 _enemyController.CalculateMovement();
                 float distanceToTarget = Vector2.Distance(transform.position, _enemyController.TargetPoint);
 

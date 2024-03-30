@@ -8,8 +8,8 @@ namespace Game
 
         private void Awake()
         {
-            _animator = GetComponent<Animator>();
-            _spriteRenderer = GetComponent<SpriteRenderer>();
+            Animator = GetComponent<Animator>();
+            SpriteRenderer = GetComponent<SpriteRenderer>();
             _enemyController = GetComponentInParent<EnemyController>();
         }
 

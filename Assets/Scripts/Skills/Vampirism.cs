@@ -5,8 +5,10 @@ using System.Collections;
 
 namespace Game
 {
-    public class Vampirism : ISkill
+    public class Vampirism : Skill
     {
+        private Coroutine _usingSkill;
+
         public override event Action<IInteractive, List<SkillEffectsEnum>> Hited;
 
         public Vampirism() : base(SkillEnum.Vampirism)
@@ -14,19 +16,23 @@ namespace Game
             Radius = 3f;
             Duration = 6f;
             RollbackTime = 6f;
+            _usingSkill = null;
             SkillEffects.Add(SkillEffectsEnum.Vampirism);
         }
 
         public override void Use()
         {
-            Physics2D.OverlapCircle(transform.position, Radius, ContactFilter, hits);
+            Physics2D.OverlapCircle(transform.position, Radius, ContactFilter, Hits);
 
-            foreach (Collider2D hit in hits)
+            foreach (Collider2D hit in Hits)
             {
                 if (hit.TryGetComponent<IDamageble>(out IDamageble obj) && IsReady)
                 {
                     IsReady = false;
-                    StartCoroutine(UsingSkill(hit));
+
+                    if (_usingSkill == null)
+                        _usingSkill = StartCoroutine(UsingSkill(hit));
+
                     break;
                 }
             }
@@ -48,6 +54,8 @@ namespace Game
                 time += tickTime;
                 yield return tick;
             }
+
+            _usingSkill = null;
         }
     }
 }

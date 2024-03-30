@@ -4,10 +4,10 @@ namespace Game
 {
     public class DoubleReactiveProperty<T1, T2>
     {
-        public event Action<T1, T2> Changed;
-
         private T1 _value1;
         private T2 _value2;
+
+        public event Action<T1, T2> Changed;
 
         public T1 Value1
         {

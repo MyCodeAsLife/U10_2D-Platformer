@@ -4,9 +4,9 @@ namespace Game
 {
     public class SingleReactiveProperty<T>
     {
-        public event Action<T> Changed;
-
         private T _value;
+
+        public event Action<T> Changed;
 
         public T Value
         {
