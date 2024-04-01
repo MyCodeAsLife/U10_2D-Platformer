@@ -4,7 +4,7 @@ using System.Collections;
 
 namespace Game
 {
-    public class UI : MonoBehaviour
+    public class HealthBarDisplay : MonoBehaviour
     {
         [SerializeField] private Slider _healthBar;
         [SerializeField] private Character _character;

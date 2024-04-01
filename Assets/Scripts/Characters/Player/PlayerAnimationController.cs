@@ -13,7 +13,7 @@ namespace Game
             _playerMovementController = GetComponentInParent<PlayerMovementController>();
         }
 
-        private void OnEnable()
+        private void Start()
         {
             _playerMovementController.IsGrounded.Changed += OnSwitchGrounded;
             _playerMovementController.IsRunning.Changed += OnSwitchRunning;
