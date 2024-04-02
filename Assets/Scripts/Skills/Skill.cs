@@ -48,7 +48,7 @@ namespace Game
                 }
             }
 
-            StartCoroutine(Renderer());
+            StartCoroutine(Rendering());
         }
 
         public void SetOwner(Transform owner)
@@ -67,7 +67,7 @@ namespace Game
             }
         }
 
-        private IEnumerator Renderer()
+        private IEnumerator Rendering()
         {
             GetComponent<SpriteRenderer>().enabled = true;
             var delay = new WaitForSeconds(Duration);

@@ -53,6 +53,7 @@ namespace Game
                 Hited?.Invoke(enemy, SkillEffects);
                 time += tickTime;
                 yield return tick;
+                Debug.Log(time);
             }
 
             _usingSkill = null;
